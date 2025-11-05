@@ -1,0 +1,297 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["extendedWhereUnique"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  SUPPORT
+  SELLER
+  BUYER
+}
+
+enum AddressType {
+  SHIPPING
+  BILLING
+  OTHER
+}
+
+enum ListingStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  SOLD
+  ARCHIVED
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  COUNTERED
+  WITHDRAWN
+  EXPIRED
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  FULFILLED
+  CANCELLED
+  REFUNDED
+  DISPUTED
+}
+
+enum OrderEventType {
+  CREATED
+  PAYMENT_CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  DISPUTE_OPENED
+  DISPUTE_RESOLVED
+  NOTE
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+  CHARGEBACK
+}
+
+enum ShipmentStatus {
+  PREPARING
+  SHIPPED
+  DELIVERED
+  RETURNED
+  LOST
+}
+
+enum DisputeStatus {
+  OPEN
+  UNDER_REVIEW
+  ESCALATED
+  RESOLVED
+  CLOSED
+}
+
+enum NotificationType {
+  OFFER_RECEIVED
+  OFFER_UPDATED
+  ORDER_UPDATED
+  DISPUTE_UPDATED
+  SYSTEM
+}
+
+model User {
+  id               String             @id @default(uuid())
+  email            String             @unique
+  passwordHash     String
+  displayName      String
+  bio              String?
+  role             UserRole           @default(BUYER)
+  phoneNumber      String?
+  avatarUrl        String?
+  listings         Listing[]          @relation("ListingSeller")
+  offers           Offer[]            @relation("OfferBuyer")
+  ordersBought     Order[]            @relation("OrderBuyer")
+  ordersSold       Order[]            @relation("OrderSeller")
+  disputesRaised   Dispute[]          @relation("DisputeRaisedBy")
+  disputesAssigned Dispute[]          @relation("DisputeAssignedTo")
+  disputeMessages  DisputeMessage[]
+  addresses        Address[]
+  notifications    Notification[]
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+}
+
+model Address {
+  id          String      @id @default(uuid())
+  userId      String
+  label       String?
+  type        AddressType @default(SHIPPING)
+  line1       String
+  line2       String?
+  city        String
+  state       String?
+  postalCode  String
+  country     String
+  isDefault   Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shippingFor Order[]     @relation("OrderShippingAddress")
+  billingFor  Order[]     @relation("OrderBillingAddress")
+}
+
+model Listing {
+  id           String          @id @default(uuid())
+  sellerId     String
+  title        String
+  slug         String          @unique
+  description  String
+  price        Decimal         @db.Decimal(10, 2)
+  currency     String          @default("USD")
+  quantity     Int             @default(1)
+  status       ListingStatus   @default(DRAFT)
+  category     String?
+  tags         String[]        @default([])
+  publishedAt  DateTime?
+  archivedAt   DateTime?
+  seller       User            @relation("ListingSeller", fields: [sellerId], references: [id], onDelete: Cascade)
+  offers       Offer[]
+  orders       Order[]
+  images       ListingImage[]
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@index([status], map: "idx_listing_status")
+  @@index([sellerId, status], map: "idx_listing_seller_status")
+}
+
+model ListingImage {
+  id        String   @id @default(uuid())
+  listingId String
+  url       String
+  altText   String?
+  position  Int      @default(0)
+  isPrimary Boolean  @default(false)
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+}
+
+model Offer {
+  id          String      @id @default(uuid())
+  listingId   String
+  buyerId     String
+  amount      Decimal     @db.Decimal(10, 2)
+  status      OfferStatus @default(PENDING)
+  message     String?
+  expiresAt   DateTime?
+  respondedAt DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  listing     Listing     @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  buyer       User        @relation("OfferBuyer", fields: [buyerId], references: [id], onDelete: Cascade)
+  order       Order?
+}
+
+model Order {
+  id                 String              @id @default(uuid())
+  listingId          String
+  buyerId            String
+  sellerId           String
+  offerId            String?
+  shippingAddressId  String?
+  billingAddressId   String?
+  status             OrderStatus         @default(PENDING)
+  totalAmount        Decimal             @db.Decimal(12, 2)
+  currency           String              @default("USD")
+  quantity           Int                 @default(1)
+  submittedAt        DateTime?           @default(now())
+  fulfilledAt        DateTime?
+  cancelledAt        DateTime?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  listing            Listing             @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  buyer              User                @relation("OrderBuyer", fields: [buyerId], references: [id], onDelete: Cascade)
+  seller             User                @relation("OrderSeller", fields: [sellerId], references: [id], onDelete: Cascade)
+  offer              Offer?              @relation(fields: [offerId], references: [id])
+  payment            Payment?
+  shipment           Shipment?
+  timelineEvents     OrderTimelineEvent[]
+  disputes           Dispute[]
+  shippingAddress    Address?            @relation("OrderShippingAddress", fields: [shippingAddressId], references: [id])
+  billingAddress     Address?            @relation("OrderBillingAddress", fields: [billingAddressId], references: [id])
+}
+
+model OrderTimelineEvent {
+  id        String          @id @default(uuid())
+  orderId   String
+  type      OrderEventType
+  detail    String
+  metadata  Json?
+  createdAt DateTime        @default(now())
+  order     Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model Payment {
+  id              String        @id @default(uuid())
+  orderId         String        @unique
+  status          PaymentStatus @default(PENDING)
+  amount          Decimal       @db.Decimal(12, 2)
+  provider        String?
+  transactionRef  String?
+  paidAt          DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  order           Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model Shipment {
+  id             String         @id @default(uuid())
+  orderId        String         @unique
+  status         ShipmentStatus @default(PREPARING)
+  carrier        String?
+  trackingNumber String?
+  shippedAt      DateTime?
+  deliveredAt    DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  order          Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model Dispute {
+  id             String         @id @default(uuid())
+  orderId        String         @unique
+  raisedById     String
+  assignedToId   String?
+  status         DisputeStatus  @default(OPEN)
+  reason         String
+  resolution     String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  resolvedAt     DateTime?
+  order          Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  raisedBy       User           @relation("DisputeRaisedBy", fields: [raisedById], references: [id], onDelete: Cascade)
+  assignedTo     User?          @relation("DisputeAssignedTo", fields: [assignedToId], references: [id])
+  messages       DisputeMessage[]
+}
+
+model DisputeMessage {
+  id         String   @id @default(uuid())
+  disputeId  String
+  authorId   String
+  body       String
+  isInternal Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  dispute    Dispute  @relation(fields: [disputeId], references: [id], onDelete: Cascade)
+  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String            @id @default(uuid())
+  userId    String
+  type      NotificationType
+  payload   Json
+  readAt    DateTime?
+  createdAt DateTime          @default(now())
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  actorId   String?
+  entity    String
+  entityId  String
+  action    String
+  metadata  Json?
+  createdAt DateTime @default(now())
+  actor     User?    @relation(fields: [actorId], references: [id])
+}
