@@ -5,6 +5,7 @@ export { OfferRepository } from './repositories/offer.repository.js';
 export { OrderRepository } from './repositories/order.repository.js';
 export { DisputeRepository } from './repositories/dispute.repository.js';
 export { MarketplaceService } from './services/marketplace.service.js';
+export { AuthService } from './services/auth.service.js';
 export type { CreateUserInput } from './repositories/user.repository.js';
 export type { CreateListingInput, ListingFilters } from './repositories/listing.repository.js';
 export type { CreateOfferInput } from './repositories/offer.repository.js';
