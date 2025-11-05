@@ -105,6 +105,19 @@ enum NotificationType {
   SYSTEM
 }
 
+enum ModerationEventType {
+  MESSAGE
+  REVIEW
+}
+
+enum ReviewStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  BLOCKED
+}
+
 model User {
   id               String             @id @default(uuid())
   email            String             @unique
@@ -139,6 +152,12 @@ model User {
   carts            Cart[]
   payouts          Payout[]          @relation("SellerPayouts")
   auditLogs        AuditLog[]        @relation("UserAuditLogs")
+  orderMessages            OrderMessage[]
+  reviewsAuthored          Review[]                    @relation("AuthorReviews")
+  reviewsReceived          Review[]                    @relation("TargetReviews")
+  moderationEvents         ModerationEvent[]
+  notificationSettings     NotificationSetting[]       @relation("UserNotificationSettings")
+  reviewModerationDecisions ReviewModerationDecision[] @relation("UserReviewModerations")
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
 }
@@ -312,6 +331,8 @@ model Order {
   payout             Payout?
   shippingAddress    Address?            @relation("OrderShippingAddress", fields: [shippingAddressId], references: [id])
   billingAddress     Address?            @relation("OrderBillingAddress", fields: [billingAddressId], references: [id])
+  messages           OrderMessage[]
+  reviews            Review[]
 }
 
 model OrderTimelineEvent {
@@ -457,6 +478,20 @@ model Dispute {
   messages       DisputeMessage[]
 }
 
+model OrderMessage {
+  id        String   @id @default(uuid())
+  orderId   String
+  authorId  String
+  body      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([orderId], map: "idx_order_message_order")
+  @@index([authorId], map: "idx_order_message_author")
+}
+
 model DisputeMessage {
   id         String   @id @default(uuid())
   disputeId  String
@@ -468,6 +503,20 @@ model DisputeMessage {
   author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
 }
 
+model NotificationSetting {
+  id            String            @id @default(uuid())
+  userId        String
+  type          NotificationType
+  emailEnabled  Boolean           @default(true)
+  inAppEnabled  Boolean           @default(true)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  user          User              @relation("UserNotificationSettings", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type], map: "uniq_notification_setting_user_type")
+  @@index([userId], map: "idx_notification_setting_user")
+}
+
 model Notification {
   id        String            @id @default(uuid())
   userId    String
@@ -476,6 +525,53 @@ model Notification {
   readAt    DateTime?
   createdAt DateTime          @default(now())
   user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Review {
+  id             String        @id @default(uuid())
+  orderId        String
+  authorId       String
+  targetUserId   String
+  rating         Int
+  body           String
+  status         ReviewStatus  @default(PENDING)
+  moderationNotes String?
+  submittedAt    DateTime      @default(now())
+  moderatedAt    DateTime?
+  order          Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  author         User          @relation("AuthorReviews", fields: [authorId], references: [id], onDelete: Cascade)
+  targetUser     User          @relation("TargetReviews", fields: [targetUserId], references: [id], onDelete: Cascade)
+  decisions      ReviewModerationDecision[]
+
+  @@unique([orderId, authorId], map: "uniq_review_order_author")
+  @@index([targetUserId], map: "idx_review_target_user")
+}
+
+model ReviewModerationDecision {
+  id          String       @id @default(uuid())
+  reviewId    String
+  moderatorId String?
+  status      ReviewStatus
+  reason      String?
+  createdAt   DateTime     @default(now())
+  review      Review       @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  moderator   User?        @relation("UserReviewModerations", fields: [moderatorId], references: [id])
+
+  @@index([reviewId], map: "idx_review_decision_review")
+}
+
+model ModerationEvent {
+  id        String               @id @default(uuid())
+  type      ModerationEventType
+  entityId  String
+  actorId   String?
+  action    String
+  metadata  Json?
+  createdAt DateTime             @default(now())
+  actor     User?                @relation(fields: [actorId], references: [id])
+
+  @@index([type], map: "idx_moderation_event_type")
+  @@index([entityId], map: "idx_moderation_event_entity")
 }
 
 model AuditLog {

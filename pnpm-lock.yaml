@@ -46,6 +46,9 @@ importers:
       '@possiblewebsite/db':
         specifier: workspace:^
         version: link:../../packages/db
+      '@sendgrid/mail':
+        specifier: ^7.7.0
+        version: 7.7.0
       bullmq:
         specifier: ^4.12.2
         version: 4.18.3
@@ -55,6 +58,9 @@ importers:
       next:
         specifier: 14.1.0
         version: 14.1.0(@babel/core@7.28.5)(react-dom@18.2.0)(react@18.2.0)
+      postmark:
+        specifier: ^3.0.4
+        version: 3.11.0
       react:
         specifier: 18.2.0
         version: 18.2.0
@@ -107,6 +113,9 @@ importers:
       '@aws-sdk/client-s3':
         specifier: ^3.525.0
         version: 3.922.0
+      '@hcaptcha/react-hcaptcha':
+        specifier: ^1.10.0
+        version: 1.14.0(react-dom@18.2.0)(react@18.2.0)
       '@possiblewebsite/config':
         specifier: workspace:^
         version: link:../../packages/config
@@ -2027,6 +2036,28 @@ packages:
     engines: { node: ^14.17.0 || ^16.13.0 || >=18.0.0, npm: '>=6.14.13' }
     dev: false
 
+  /@hcaptcha/loader@2.2.0:
+    resolution:
+      {
+        integrity: sha512-LAd0XRt1Mu0hLpUpWAx5OS9FS0d6V+V0aCSYUKFAz0a6tTDHeAuwm5iO81mp2HIEhXFOSSB8AwCCOU9zq695lg==,
+      }
+    dev: false
+
+  /@hcaptcha/react-hcaptcha@1.14.0(react-dom@18.2.0)(react@18.2.0):
+    resolution:
+      {
+        integrity: sha512-XHFhmRjw4L6spgRfTEUj/uW4cN4iWTp7BxLHyheF5zEle6g65fIHUCmqKMrIA/6OKLzBSElUKyc1IuDU+V8RaQ==,
+      }
+    peerDependencies:
+      react: '>= 16.3.0'
+      react-dom: '>= 16.3.0'
+    dependencies:
+      '@babel/runtime': 7.28.4
+      '@hcaptcha/loader': 2.2.0
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    dev: false
+
   /@humanwhocodes/config-array@0.13.0:
     resolution:
       {
@@ -2824,6 +2855,42 @@ packages:
         integrity: sha512-jGTk8UD/RdjsNZW8qq10r0RBvxL8OWtoT+kImlzPDFilmozzM+9QmIJsmze9UiSBrFU45ZxhTYBypn9q9z/VfQ==,
       }
     dev: true
+
+  /@sendgrid/client@7.7.0:
+    resolution:
+      {
+        integrity: sha512-SxH+y8jeAQSnDavrTD0uGDXYIIkFylCo+eDofVmZLQ0f862nnqbC3Vd1ej6b7Le7lboyzQF6F7Fodv02rYspuA==,
+      }
+    engines: { node: 6.* || 8.* || >=10.* }
+    dependencies:
+      '@sendgrid/helpers': 7.7.0
+      axios: 0.26.1
+    transitivePeerDependencies:
+      - debug
+    dev: false
+
+  /@sendgrid/helpers@7.7.0:
+    resolution:
+      {
+        integrity: sha512-3AsAxfN3GDBcXoZ/y1mzAAbKzTtUZ5+ZrHOmWQ279AuaFXUNCh9bPnRpN504bgveTqoW+11IzPg3I0WVgDINpw==,
+      }
+    engines: { node: '>= 6.0.0' }
+    dependencies:
+      deepmerge: 4.3.1
+    dev: false
+
+  /@sendgrid/mail@7.7.0:
+    resolution:
+      {
+        integrity: sha512-5+nApPE9wINBvHSUxwOxkkQqM/IAAaBYoP9hw7WwgDNQPxraruVqHizeTitVtKGiqWCKm2mnjh4XGN3fvFLqaw==,
+      }
+    engines: { node: 6.* || 8.* || >=10.* }
+    dependencies:
+      '@sendgrid/client': 7.7.0
+      '@sendgrid/helpers': 7.7.0
+    transitivePeerDependencies:
+      - debug
+    dev: false
 
   /@sinclair/typebox@0.27.8:
     resolution:
@@ -4493,6 +4560,28 @@ packages:
     engines: { node: '>=4' }
     dev: true
 
+  /axios@0.25.0:
+    resolution:
+      {
+        integrity: sha512-cD8FOb0tRH3uuEe6+evtAbgJtfxr7ly3fQjYcMcuPlgkwVS9xboaVIpcDV+cYQe+yGykgwZCs1pzjntcGa6l5g==,
+      }
+    dependencies:
+      follow-redirects: 1.15.11
+    transitivePeerDependencies:
+      - debug
+    dev: false
+
+  /axios@0.26.1:
+    resolution:
+      {
+        integrity: sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==,
+      }
+    dependencies:
+      follow-redirects: 1.15.11
+    transitivePeerDependencies:
+      - debug
+    dev: false
+
   /axobject-query@4.1.0:
     resolution:
       {
@@ -5280,7 +5369,6 @@ packages:
         integrity: sha512-3sUqbMEc77XqpdNO7FRyRog+eW3ph+GYCbj+rK+uYyRMuwsVy0rMiVtPn+QJlKFvWP/1PYpapqYn0Me2knFn+A==,
       }
     engines: { node: '>=0.10.0' }
-    dev: true
 
   /define-data-property@1.1.4:
     resolution:
@@ -6230,6 +6318,19 @@ packages:
         integrity: sha512-GX+ysw4PBCz0PzosHDepZGANEuFCMLrnRTiEy9McGjmkCQYwRq4A/X786G/fjM/+OjsWSU1ZrY5qyARZmO/uwg==,
       }
     dev: true
+
+  /follow-redirects@1.15.11:
+    resolution:
+      {
+        integrity: sha512-deG2P0JfjrTxl50XGCDyfI97ZGVCxIpfKYmfyrQ54n5FO/0gfIES8C/Psl6kWVDolizcaaxZJnTS0QSMxvnsBQ==,
+      }
+    engines: { node: '>=4.0' }
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
+    dev: false
 
   /for-each@0.3.5:
     resolution:
@@ -9193,6 +9294,17 @@ packages:
       nanoid: 3.3.11
       picocolors: 1.1.1
       source-map-js: 1.2.1
+    dev: false
+
+  /postmark@3.11.0:
+    resolution:
+      {
+        integrity: sha512-asguBQ9M/8ueQMJ1D45iPF+3+T641q8rAU8m8cQSfhDWePw4TVYql9wszjAwSCE93dUonyrF08D8Kvg6USBoFA==,
+      }
+    dependencies:
+      axios: 0.25.0
+    transitivePeerDependencies:
+      - debug
     dev: false
 
   /preact-render-to-string@5.2.3(preact@10.11.3):

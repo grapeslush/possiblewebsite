@@ -121,6 +121,41 @@ export class OrderRepository {
     });
   }
 
+  listMessages(orderId: string) {
+    return this.prisma.orderMessage.findMany({
+      where: { orderId },
+      orderBy: { createdAt: 'asc' },
+      include: {
+        author: {
+          select: {
+            id: true,
+            displayName: true,
+            avatarUrl: true,
+          },
+        },
+      },
+    });
+  }
+
+  addMessage(orderId: string, authorId: string, body: string) {
+    return this.prisma.orderMessage.create({
+      data: {
+        orderId,
+        authorId,
+        body,
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            displayName: true,
+            avatarUrl: true,
+          },
+        },
+      },
+    });
+  }
+
   createShipment(
     orderId: string,
     trackingNumber: string,
