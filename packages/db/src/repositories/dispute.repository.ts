@@ -1,8 +1,4 @@
-import {
-  DisputeStatus,
-  NotificationType,
-  PrismaClient
-} from '@prisma/client';
+import { DisputeStatus, NotificationType, PrismaClient } from '@prisma/client';
 
 export interface OpenDisputeInput {
   orderId: string;
@@ -26,13 +22,13 @@ export class DisputeRepository {
         messages: {
           create: {
             authorId: input.raisedById,
-            body: input.initialMessage
-          }
-        }
+            body: input.initialMessage,
+          },
+        },
       },
       include: {
-        messages: true
-      }
+        messages: true,
+      },
     });
   }
 
@@ -42,8 +38,8 @@ export class DisputeRepository {
         where: { id: disputeId },
         data: {
           assignedToId: agentId,
-          status: DisputeStatus.UNDER_REVIEW
-        }
+          status: DisputeStatus.UNDER_REVIEW,
+        },
       });
 
       await tx.notification.create({
@@ -52,9 +48,9 @@ export class DisputeRepository {
           type: NotificationType.DISPUTE_UPDATED,
           payload: {
             disputeId,
-            message: 'You have been assigned to a dispute.'
-          }
-        }
+            message: 'You have been assigned to a dispute.',
+          },
+        },
       });
 
       return dispute;
@@ -67,8 +63,54 @@ export class DisputeRepository {
         disputeId,
         authorId,
         body,
-        isInternal
-      }
+        isInternal,
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            displayName: true,
+            avatarUrl: true,
+          },
+        },
+      },
+    });
+  }
+
+  listMessages(disputeId: string) {
+    return this.prisma.disputeMessage.findMany({
+      where: { disputeId },
+      orderBy: { createdAt: 'asc' },
+      include: {
+        author: {
+          select: {
+            id: true,
+            displayName: true,
+            avatarUrl: true,
+          },
+        },
+      },
+    });
+  }
+
+  getDisputeWithParticipants(disputeId: string) {
+    return this.prisma.dispute.findUnique({
+      where: { id: disputeId },
+      include: {
+        order: {
+          select: {
+            id: true,
+            buyerId: true,
+            sellerId: true,
+          },
+        },
+        raisedBy: {
+          select: { id: true, displayName: true, email: true },
+        },
+        assignedTo: {
+          select: { id: true, displayName: true, email: true },
+        },
+      },
     });
   }
 
@@ -78,8 +120,8 @@ export class DisputeRepository {
       data: {
         status: DisputeStatus.RESOLVED,
         resolution,
-        resolvedAt: new Date()
-      }
+        resolvedAt: new Date(),
+      },
     });
   }
 
@@ -87,22 +129,22 @@ export class DisputeRepository {
     return this.prisma.dispute.findMany({
       where: {
         status: {
-          in: [DisputeStatus.OPEN, DisputeStatus.UNDER_REVIEW, DisputeStatus.ESCALATED]
-        }
+          in: [DisputeStatus.OPEN, DisputeStatus.UNDER_REVIEW, DisputeStatus.ESCALATED],
+        },
       },
       include: {
         order: {
           select: {
             id: true,
             buyer: { select: { id: true, displayName: true } },
-            seller: { select: { id: true, displayName: true } }
-          }
+            seller: { select: { id: true, displayName: true } },
+          },
         },
         messages: {
-          orderBy: { createdAt: 'asc' }
-        }
+          orderBy: { createdAt: 'asc' },
+        },
       },
-      orderBy: { createdAt: 'asc' }
+      orderBy: { createdAt: 'asc' },
     });
   }
 }
