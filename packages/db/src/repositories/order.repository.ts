@@ -4,7 +4,7 @@ import {
   OrderStatus,
   Prisma,
   PrismaClient,
-  ShipmentStatus
+  ShipmentStatus,
 } from '@prisma/client';
 import { toDecimal } from '../utils/decimal.js';
 
@@ -18,6 +18,12 @@ export interface CreateOrderInput {
   quantity?: number;
   shippingAddressId?: string | null;
   billingAddressId?: string | null;
+  items?: Array<{
+    listingId: string;
+    offerId?: string | null;
+    quantity?: number;
+    unitPrice: number | string | Prisma.Decimal;
+  }>;
 }
 
 export class OrderRepository {
@@ -38,16 +44,27 @@ export class OrderRepository {
             input.shippingAddressId === undefined ? undefined : input.shippingAddressId,
           billingAddressId:
             input.billingAddressId === undefined ? undefined : input.billingAddressId,
+          items:
+            input.items && input.items.length
+              ? {
+                  create: input.items.map((item) => ({
+                    listingId: item.listingId,
+                    offerId: item.offerId ?? undefined,
+                    quantity: item.quantity ?? 1,
+                    unitPrice: toDecimal(item.unitPrice),
+                  })),
+                }
+              : undefined,
           timelineEvents: {
             create: {
               type: OrderEventType.CREATED,
-              detail: 'Order created via repository'
-            }
-          }
+              detail: 'Order created via repository',
+            },
+          },
         },
         include: {
-          listing: true
-        }
+          listing: true,
+        },
       });
 
       await tx.notification.create({
@@ -57,9 +74,9 @@ export class OrderRepository {
           payload: {
             orderId: order.id,
             status: order.status,
-            listingTitle: order.listing.title
-          }
-        }
+            listingTitle: order.listing.title,
+          },
+        },
       });
 
       return order;
@@ -76,9 +93,9 @@ export class OrderRepository {
         payment: true,
         shipment: true,
         timelineEvents: {
-          orderBy: { createdAt: 'asc' }
-        }
-      }
+          orderBy: { createdAt: 'asc' },
+        },
+      },
     });
   }
 
@@ -88,8 +105,8 @@ export class OrderRepository {
       data: {
         status,
         fulfilledAt: status === OrderStatus.FULFILLED ? new Date() : undefined,
-        cancelledAt: status === OrderStatus.CANCELLED ? new Date() : undefined
-      }
+        cancelledAt: status === OrderStatus.CANCELLED ? new Date() : undefined,
+      },
     });
   }
 
@@ -98,8 +115,8 @@ export class OrderRepository {
       data: {
         orderId,
         type,
-        detail
-      }
+        detail,
+      },
     });
   }
 
@@ -109,14 +126,33 @@ export class OrderRepository {
       update: {
         status: ShipmentStatus.SHIPPED,
         trackingNumber,
-        shippedAt: new Date()
+        shippedAt: new Date(),
       },
       create: {
         orderId,
         trackingNumber,
         status: ShipmentStatus.SHIPPED,
-        shippedAt: new Date()
-      }
+        shippedAt: new Date(),
+      },
+    });
+  }
+
+  updateShipmentStatus(orderId: string, status: ShipmentStatus, trackingNumber?: string | null) {
+    return this.prisma.shipment.upsert({
+      where: { orderId },
+      update: {
+        status,
+        trackingNumber: trackingNumber ?? undefined,
+        deliveredAt: status === ShipmentStatus.DELIVERED ? new Date() : undefined,
+        updatedAt: new Date(),
+      },
+      create: {
+        orderId,
+        status,
+        trackingNumber: trackingNumber ?? undefined,
+        shippedAt: status === ShipmentStatus.SHIPPED ? new Date() : undefined,
+        deliveredAt: status === ShipmentStatus.DELIVERED ? new Date() : undefined,
+      },
     });
   }
 }
