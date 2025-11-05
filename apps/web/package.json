@@ -12,12 +12,14 @@
   },
   "dependencies": {
     "@possiblewebsite/config": "workspace:^",
+    "@possiblewebsite/db": "workspace:^",
     "@auth/prisma-adapter": "^1.0.12",
     "@radix-ui/react-slot": "^1.0.2",
     "bcryptjs": "^2.4.3",
     "autoprefixer": "^10.4.17",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "@aws-sdk/client-s3": "^3.525.0",
     "next-auth": "^4.24.7",
     "lucide-react": "^0.344.0",
     "next": "14.1.0",
@@ -27,7 +29,8 @@
     "stripe": "^14.22.0",
     "tailwind-merge": "^2.2.1",
     "tailwindcss": "^3.4.1",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@playwright/test": "^1.43.1",
