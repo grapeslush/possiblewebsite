@@ -80,6 +80,15 @@ enum ShipmentStatus {
   LOST
 }
 
+enum ShipmentTrackingStatus {
+  UNKNOWN
+  LABEL_PURCHASED
+  IN_TRANSIT
+  OUT_FOR_DELIVERY
+  DELIVERED
+  EXCEPTION
+}
+
 enum DisputeStatus {
   OPEN
   UNDER_REVIEW
@@ -405,16 +414,30 @@ model Payout {
 }
 
 model Shipment {
-  id             String         @id @default(uuid())
-  orderId        String         @unique
-  status         ShipmentStatus @default(PREPARING)
-  carrier        String?
-  trackingNumber String?
-  shippedAt      DateTime?
-  deliveredAt    DateTime?
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  order          Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  id                     String                  @id @default(uuid())
+  orderId                String                  @unique
+  status                 ShipmentStatus          @default(PREPARING)
+  provider               String?
+  carrier                String?
+  serviceLevel           String?
+  trackingNumber         String?
+  trackingUrl            String?
+  trackingSubscriptionId String?
+  trackingStatus         ShipmentTrackingStatus  @default(UNKNOWN)
+  trackingStatusDetail   String?
+  trackingLastEventAt    DateTime?
+  trackingLastCheckedAt  DateTime?
+  trackingNextCheckAt    DateTime?
+  labelUrl               String?
+  labelKey               String?
+  labelCost              Decimal?                @db.Decimal(10, 2)
+  labelCurrency          String?
+  labelPurchasedAt       DateTime?
+  shippedAt              DateTime?
+  deliveredAt            DateTime?
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  order                  Order                   @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
 
 model Dispute {
