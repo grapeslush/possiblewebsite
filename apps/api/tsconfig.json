@@ -5,5 +5,14 @@
     "paths": {
       "@/*": ["./*"]
     }
-  }
+  },
+  "include": [
+    "next-env.d.ts",
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "lib/**/*.ts",
+    "__tests__/**/*.ts",
+    "*.ts"
+  ],
+  "exclude": ["node_modules"]
 }
