@@ -3,6 +3,7 @@ import IORedis from 'ioredis';
 import { marketplace } from './services';
 import { releasePayoutForOrder } from './payouts';
 import { prisma } from './services';
+import { pollTrackingForShipment } from './shipping/service.js';
 
 const redisUrl = process.env.REDIS_URL ?? 'redis://localhost:6379';
 
@@ -26,6 +27,7 @@ const globalQueues = globalThis as unknown as {
     reviewReminder: Queue;
     aiRecompute: Queue;
     webhookRetry: Queue;
+    shipmentTracking: Queue;
   };
 };
 
@@ -36,6 +38,7 @@ if (!globalQueues.__queues__) {
     reviewReminder: createQueue('review-reminder'),
     aiRecompute: createQueue('ai-recompute'),
     webhookRetry: createQueue('webhook-retry'),
+    shipmentTracking: createQueue('shipment-tracking'),
   };
 }
 
@@ -75,6 +78,17 @@ export const enqueueAiRecompute = async (listingId: string) => {
 
 export const enqueueWebhookRetry = async (eventId: string) => {
   await queues.webhookRetry.add('retry-webhook', { eventId }, defaultJobOptions);
+};
+
+export const enqueueShipmentTrackingPoll = async (shipmentId: string, runAt?: Date) => {
+  await queues.shipmentTracking.add(
+    'shipment-tracking-poll',
+    { shipmentId },
+    {
+      ...defaultJobOptions,
+      delay: runAt ? Math.max(runAt.getTime() - Date.now(), 0) : 0,
+    },
+  );
 };
 
 let workersRegistered = false;
@@ -145,6 +159,14 @@ export const registerQueueWorkers = () => {
           },
         },
       });
+    },
+    queueOptions,
+  );
+
+  new Worker(
+    queues.shipmentTracking.name,
+    async (job) => {
+      await pollTrackingForShipment(job.data.shipmentId);
     },
     queueOptions,
   );
