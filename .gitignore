@@ -1,0 +1,9 @@
+node_modules
+.pnpm-store
+.next
+out
+.DS_Store
+*.log
+.env*
+.husky/_
+.tsbuild
