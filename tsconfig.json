@@ -1,0 +1,10 @@
+{
+  "extends": "@possiblewebsite/config/tsconfig/base",
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": ".",
+    "outDir": "./.tsbuild"
+  },
+  "include": ["packages", "apps"],
+  "exclude": ["node_modules"]
+}

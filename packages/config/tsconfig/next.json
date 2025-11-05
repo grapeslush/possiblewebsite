@@ -1,0 +1,16 @@
+{
+  "extends": "@possiblewebsite/config/tsconfig/base",
+  "compilerOptions": {
+    "types": ["node"],
+    "jsx": "preserve",
+    "noEmit": true,
+    "moduleDetection": "force",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.cjs", "**/*.mjs"],
+  "exclude": ["node_modules"]
+}

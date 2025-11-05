@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 255 255 255;
+  --foreground: 17 17 17;
+  --primary: 246 15 32;
+  --secondary: 27 32 110;
+}
+
+body {
+  @apply bg-white font-sans text-brand-accent;
+}

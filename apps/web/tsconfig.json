@@ -1,0 +1,9 @@
+{
+  "extends": "@possiblewebsite/config/tsconfig/next",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    }
+  }
+}
