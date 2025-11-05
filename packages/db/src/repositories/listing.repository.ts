@@ -21,6 +21,14 @@ export interface ListingFilters {
   category?: string;
 }
 
+export interface SearchFilters {
+  term?: string;
+  category?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  limit?: number;
+}
+
 export class ListingRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
@@ -120,5 +128,120 @@ export class ListingRepository {
         }
       }
     });
+  }
+
+  async getListingBySlug(slug: string) {
+    return this.prisma.listing.findUnique({
+      where: { slug },
+      include: {
+        seller: true,
+        images: {
+          orderBy: { position: 'asc' }
+        },
+        offers: {
+          orderBy: { createdAt: 'desc' },
+          include: {
+            buyer: {
+              select: {
+                id: true,
+                displayName: true,
+                avatarUrl: true
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  async searchListings(filters: SearchFilters = {}) {
+    const limit = Math.min(filters.limit ?? 24, 50);
+    const hasTerm = Boolean(filters.term && filters.term.trim().length > 0);
+
+    const baseWhere: Prisma.ListingWhereInput = {
+      status: ListingStatus.ACTIVE,
+      category: filters.category,
+      price: {
+        gte: filters.minPrice ? new Prisma.Decimal(filters.minPrice) : undefined,
+        lte: filters.maxPrice ? new Prisma.Decimal(filters.maxPrice) : undefined
+      }
+    };
+
+    if (!hasTerm) {
+      return this.prisma.listing.findMany({
+        where: baseWhere,
+        include: {
+          seller: {
+            select: { id: true, displayName: true, avatarUrl: true }
+          },
+          images: {
+            orderBy: { position: 'asc' }
+          }
+        },
+        orderBy: [
+          { publishedAt: 'desc' },
+          { createdAt: 'desc' }
+        ],
+        take: limit
+      });
+    }
+
+    try {
+      const term = filters.term?.trim() ?? '';
+      const rows = await this.prisma.$queryRaw<{ id: string }[]>`
+        SELECT l."id"
+        FROM "Listing" AS l
+        WHERE l."status" = ${ListingStatus.ACTIVE}
+          ${filters.category ? Prisma.sql`AND l."category" = ${filters.category}` : Prisma.empty}
+          ${filters.minPrice ? Prisma.sql`AND l."price" >= ${new Prisma.Decimal(filters.minPrice)}` : Prisma.empty}
+          ${filters.maxPrice ? Prisma.sql`AND l."price" <= ${new Prisma.Decimal(filters.maxPrice)}` : Prisma.empty}
+          AND (l."title" % ${term} OR l."description" % ${term})
+        ORDER BY similarity(l."title", ${term}) DESC, l."publishedAt" DESC NULLS LAST
+        LIMIT ${limit}
+      `;
+
+      const ids = rows.map((row) => row.id);
+      if (ids.length === 0) {
+        return [];
+      }
+
+      const listings = await this.prisma.listing.findMany({
+        where: { id: { in: ids } },
+        include: {
+          seller: {
+            select: { id: true, displayName: true, avatarUrl: true }
+          },
+          images: {
+            orderBy: { position: 'asc' }
+          }
+        }
+      });
+
+      const listingById = new Map(listings.map((listing) => [listing.id, listing]));
+      return ids
+        .map((id) => listingById.get(id))
+        .filter((listing): listing is NonNullable<typeof listing> => Boolean(listing));
+    } catch (error) {
+      // pg_trgm might not be available; fall back to ILIKE search
+      return this.prisma.listing.findMany({
+        where: {
+          ...baseWhere,
+          OR: [
+            { title: { contains: filters.term ?? '', mode: 'insensitive' } },
+            { description: { contains: filters.term ?? '', mode: 'insensitive' } }
+          ]
+        },
+        include: {
+          seller: {
+            select: { id: true, displayName: true, avatarUrl: true }
+          },
+          images: {
+            orderBy: { position: 'asc' }
+          }
+        },
+        orderBy: { createdAt: 'desc' },
+        take: limit
+      });
+    }
   }
 }
