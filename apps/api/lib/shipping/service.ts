@@ -3,14 +3,14 @@ import {
   OrderEventType,
   ShipmentStatus,
   ShipmentTrackingStatus,
-} from '@prisma/client';
+} from '@possiblewebsite/db';
 
 import { OrderRepository, prisma } from '@possiblewebsite/db';
 
-import { releasePayoutForOrder } from '../payouts.js';
-import { enqueueShipmentTrackingPoll } from '../queues.js';
-import type { TrackingStatusResponse } from './provider.js';
-import { getShippingProvider } from './index.js';
+import { releasePayoutForOrder } from '../payouts';
+import { enqueueShipmentTrackingPoll } from '../queues';
+import type { TrackingStatusResponse } from './provider';
+import { getShippingProvider } from './index';
 
 const repository = new OrderRepository(prisma);
 

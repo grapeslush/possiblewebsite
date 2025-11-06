@@ -4,7 +4,9 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"]
-    }
+    },
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "incremental": true
   },
   "include": [
     "next-env.d.ts",
@@ -12,7 +14,8 @@
     "app/**/*.tsx",
     "lib/**/*.ts",
     "__tests__/**/*.ts",
-    "*.ts"
+    "*.ts",
+    ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "jest.config.ts"]
 }

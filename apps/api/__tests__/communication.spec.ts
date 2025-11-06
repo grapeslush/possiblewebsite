@@ -1,4 +1,4 @@
-jest.mock('../lib/services.js', () => ({
+jest.mock('../lib/services', () => ({
   notificationSettings: {
     isEmailEnabled: jest.fn(),
     isInAppEnabled: jest.fn(),
@@ -11,15 +11,15 @@ jest.mock('../lib/services.js', () => ({
   },
 }));
 
-jest.mock('../lib/email.js', () => ({
+jest.mock('../lib/email', () => ({
   emailClient: {
     sendTemplate: jest.fn(),
   },
 }));
 
-import { notifyOrderMessage } from '../lib/communication.js';
-import { notificationSettings, prisma, auditLogs } from '../lib/services.js';
-import { emailClient } from '../lib/email.js';
+import { notifyOrderMessage } from '../lib/communication';
+import { notificationSettings, prisma, auditLogs } from '../lib/services';
+import { emailClient } from '../lib/email';
 
 describe('order communication notifications', () => {
   beforeEach(() => {

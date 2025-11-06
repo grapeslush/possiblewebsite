@@ -1,5 +1,5 @@
 import { OfferStatus, Prisma, PrismaClient } from '@prisma/client';
-import { toDecimal } from '../utils/decimal.js';
+import { toDecimal } from '../utils/decimal';
 
 export interface CreateOfferInput {
   listingId: string;

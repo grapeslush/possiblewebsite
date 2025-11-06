@@ -3,11 +3,11 @@ import { ReviewStatus } from '@prisma/client';
 import { z } from 'zod';
 
 import { instrumentRoute, incrementMetric, logger } from '../../../lib/observability';
-import { detectProfanity } from '../../../lib/profanity.js';
-import { evaluateReview } from '../../../lib/moderation.js';
-import { verifyCaptcha } from '../../../lib/hcaptcha.js';
-import { rateLimiter } from '../../../lib/rate-limit.js';
-import { auditLogs, prisma, reviews } from '../../../lib/services.js';
+import { detectProfanity } from '../../../lib/profanity';
+import { evaluateReview } from '../../../lib/moderation';
+import { verifyCaptcha } from '../../../lib/hcaptcha';
+import { rateLimiter } from '../../../lib/rate-limit';
+import { auditLogs, prisma, reviews } from '../../../lib/services';
 
 const submitSchema = z.object({
   orderId: z.string(),

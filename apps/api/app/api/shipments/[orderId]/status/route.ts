@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { OrderRepository, prisma } from '@possiblewebsite/db';
 import { OrderEventType, ShipmentStatus } from '@prisma/client';
-import { releasePayoutForOrder } from '../../../../../lib/payouts.js';
+import { releasePayoutForOrder } from '../../../../../lib/payouts';
 
 const repository = new OrderRepository(prisma);
 

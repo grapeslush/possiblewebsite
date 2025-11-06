@@ -1,5 +1,5 @@
 import { DisputeStatus, NotificationType, PrismaClient } from '@prisma/client';
-import { DisputeRepository } from '../repositories/dispute.repository.js';
+import { DisputeRepository } from '../repositories/dispute.repository';
 
 describe('DisputeRepository', () => {
   it('assigns an agent and creates a notification in a transaction', async () => {
@@ -9,17 +9,17 @@ describe('DisputeRepository', () => {
 
     const transactionClient = {
       dispute: { update: disputeUpdateMock },
-      notification: { create: notificationCreateMock }
+      notification: { create: notificationCreateMock },
     };
 
     const transactionMock = jest
       .fn()
       .mockImplementation(async (callback: (tx: typeof transactionClient) => Promise<unknown>) =>
-        callback(transactionClient as unknown as Parameters<typeof callback>[0])
+        callback(transactionClient as unknown as Parameters<typeof callback>[0]),
       );
 
     const prisma = {
-      $transaction: transactionMock
+      $transaction: transactionMock,
     } as unknown as PrismaClient;
 
     const repository = new DisputeRepository(prisma);
@@ -29,13 +29,19 @@ describe('DisputeRepository', () => {
     expect(disputeUpdateMock).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { id: 'dispute-1' },
-        data: expect.objectContaining({ assignedToId: 'agent-1', status: DisputeStatus.UNDER_REVIEW })
-      })
+        data: expect.objectContaining({
+          assignedToId: 'agent-1',
+          status: DisputeStatus.UNDER_REVIEW,
+        }),
+      }),
     );
     expect(notificationCreateMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({ userId: 'agent-1', type: NotificationType.DISPUTE_UPDATED })
-      })
+        data: expect.objectContaining({
+          userId: 'agent-1',
+          type: NotificationType.DISPUTE_UPDATED,
+        }),
+      }),
     );
   });
 });

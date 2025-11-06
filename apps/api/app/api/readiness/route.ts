@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 
 import { incrementMetric, logger } from '../../../lib/observability';
-import { prisma } from '../../../lib/services.js';
+import { prisma } from '../../../lib/services';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 const requiredEnvVars = [
   'DATABASE_URL',

@@ -2,9 +2,10 @@ import { NextResponse } from 'next/server';
 import IORedis from 'ioredis';
 
 import { incrementMetric, logger } from '../../../lib/observability';
-import { prisma } from '../../../lib/services.js';
+import { prisma } from '../../../lib/services';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   const checks: Record<string, { status: 'pass' | 'fail'; latencyMs?: number; error?: string }> =

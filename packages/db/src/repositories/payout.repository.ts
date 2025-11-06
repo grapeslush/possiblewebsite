@@ -1,5 +1,5 @@
 import { PayoutStatus, PrismaClient, Prisma } from '@prisma/client';
-import { toDecimal } from '../utils/decimal.js';
+import { toDecimal } from '../utils/decimal';
 
 export class PayoutRepository {
   constructor(private readonly prisma: PrismaClient) {}

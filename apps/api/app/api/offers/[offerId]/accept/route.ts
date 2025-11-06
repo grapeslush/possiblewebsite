@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { marketplace } from '../../../../../lib/services.js';
-import { enqueueReviewReminder } from '../../../../../lib/queues.js';
+import { marketplace } from '../../../../../lib/services';
+import { enqueueReviewReminder } from '../../../../../lib/queues';
 
 const acceptOfferSchema = z.object({
   shippingAddressId: z.string().nullable().optional(),

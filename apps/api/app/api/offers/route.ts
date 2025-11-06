@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
 import { instrumentRoute, incrementMetric, logger } from '../../../lib/observability';
-import { marketplace } from '../../../lib/services.js';
-import { scheduleOfferExpiry } from '../../../lib/queues.js';
+import { marketplace } from '../../../lib/services';
+import { scheduleOfferExpiry } from '../../../lib/queues';
 
 const createOfferSchema = z.object({
   listingId: z.string(),

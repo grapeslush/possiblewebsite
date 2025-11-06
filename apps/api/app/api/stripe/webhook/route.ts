@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { PaymentRepository, OrderRepository, prisma } from '@possiblewebsite/db';
-import { stripe } from '../../../../lib/stripe.js';
-import { OrderEventType, OrderStatus, PaymentStatus } from '@prisma/client';
+import { stripe } from '../../../../lib/stripe';
+import { OrderEventType, OrderStatus, PaymentStatus, Prisma } from '@prisma/client';
 
 const paymentRepository = new PaymentRepository(prisma);
 const orderRepository = new OrderRepository(prisma);
@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
           entity: 'StripeEvent',
           entityId: event.id,
           action: 'RECEIVED',
-          metadata: event as unknown as Record<string, unknown>,
+          metadata: event as unknown as Prisma.InputJsonValue,
         },
       });
     }

@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { detectProfanity } from '../../../../../lib/profanity.js';
-import { verifyCaptcha } from '../../../../../lib/hcaptcha.js';
-import { rateLimiter } from '../../../../../lib/rate-limit.js';
-import { notifyOrderMessage } from '../../../../../lib/communication.js';
-import { orders, prisma } from '../../../../../lib/services.js';
+import { detectProfanity } from '../../../../../lib/profanity';
+import { verifyCaptcha } from '../../../../../lib/hcaptcha';
+import { rateLimiter } from '../../../../../lib/rate-limit';
+import { notifyOrderMessage } from '../../../../../lib/communication';
+import { orders, prisma } from '../../../../../lib/services';
 
 const messageSchema = z.object({
   authorId: z.string(),

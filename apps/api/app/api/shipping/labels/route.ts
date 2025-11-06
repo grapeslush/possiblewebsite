@@ -10,10 +10,10 @@ import { z } from 'zod';
 
 import { OrderRepository, prisma } from '@possiblewebsite/db';
 
-import { uploadBinary } from '../../../../lib/storage.js';
-import { enqueueShipmentTrackingPoll } from '../../../../lib/queues.js';
-import { getFallbackPollInterval } from '../../../../lib/shipping/service.js';
-import { getShippingProvider } from '../../../../lib/shipping/index.js';
+import { uploadBinary } from '../../../../lib/storage';
+import { enqueueShipmentTrackingPoll } from '../../../../lib/queues';
+import { getFallbackPollInterval } from '../../../../lib/shipping/service';
+import { getShippingProvider } from '../../../../lib/shipping/index';
 
 const repository = new OrderRepository(prisma);
 

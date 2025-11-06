@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { marketplace } from '../../../../../lib/services.js';
-import { scheduleOfferExpiry } from '../../../../../lib/queues.js';
+import { marketplace } from '../../../../../lib/services';
+import { scheduleOfferExpiry } from '../../../../../lib/queues';
 
 const counterSchema = z.object({
   amount: z.number(),

@@ -1,21 +1,34 @@
-import { Queue, QueueScheduler, Worker, JobsOptions, QueueEvents } from 'bullmq';
+import { Queue, Worker, JobsOptions, QueueEvents } from 'bullmq';
 import IORedis from 'ioredis';
 import { marketplace } from './services';
 import { releasePayoutForOrder } from './payouts';
 import { prisma } from './services';
-import { pollTrackingForShipment } from './shipping/service.js';
+import { pollTrackingForShipment } from './shipping/service';
 
-const redisUrl = process.env.REDIS_URL ?? 'redis://localhost:6379';
+const redisUrl = process.env.REDIS_URL;
+const hasRedis = Boolean(redisUrl);
 
-const connection = new IORedis(redisUrl);
+const connection = hasRedis ? new IORedis(redisUrl!) : undefined;
 
-const queueOptions = {
-  connection,
-};
+const queueOptions = hasRedis
+  ? {
+      connection: connection!,
+    }
+  : undefined;
 
-const createQueue = (name: string) => {
+const createQueue = (name: string): Queue => {
+  if (!hasRedis || !queueOptions) {
+    return {
+      name,
+      add: async () => undefined,
+      addBulk: async () => [],
+      close: async () => undefined,
+      pause: async () => undefined,
+      resume: async () => undefined,
+    } as unknown as Queue;
+  }
+
   const queue = new Queue(name, queueOptions);
-  new QueueScheduler(name, queueOptions);
   new QueueEvents(name, queueOptions);
   return queue;
 };
@@ -94,7 +107,7 @@ export const enqueueShipmentTrackingPoll = async (shipmentId: string, runAt?: Da
 let workersRegistered = false;
 
 export const registerQueueWorkers = () => {
-  if (workersRegistered) return;
+  if (workersRegistered || !hasRedis || !queueOptions) return;
 
   new Worker(
     queues.offerExpiry.name,
@@ -174,4 +187,6 @@ export const registerQueueWorkers = () => {
   workersRegistered = true;
 };
 
-registerQueueWorkers();
+if (process.env.NEXT_PHASE !== 'phase-production-build') {
+  registerQueueWorkers();
+}

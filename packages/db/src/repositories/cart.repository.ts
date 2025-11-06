@@ -1,5 +1,5 @@
 import { Cart, CartItem, Prisma, PrismaClient } from '@prisma/client';
-import { toDecimal } from '../utils/decimal.js';
+import { toDecimal } from '../utils/decimal';
 
 export interface AddCartItemInput {
   listingId: string;

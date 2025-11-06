@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { applyTrackingUpdate } from '../../../../lib/shipping/service.js';
-import { getShippingProvider } from '../../../../lib/shipping/index.js';
+import { applyTrackingUpdate } from '../../../../lib/shipping/service';
+import { getShippingProvider } from '../../../../lib/shipping/index';
 
 export const runtime = 'nodejs';
 

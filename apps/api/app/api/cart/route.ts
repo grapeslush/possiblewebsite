@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { CartRepository, prisma } from '@possiblewebsite/db';
 
 import { instrumentRoute, incrementMetric, logger } from '../../../lib/observability';
-import { marketplace } from '../../../lib/services.js';
+import { marketplace } from '../../../lib/services';
 
 const addToCartSchema = z.object({
   buyerId: z.string(),

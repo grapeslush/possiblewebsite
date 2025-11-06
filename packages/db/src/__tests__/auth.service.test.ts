@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 import { authenticator } from 'otplib';
 import type { PolicyAcceptance, PrismaClient, TotpDevice, User } from '@prisma/client';
-import { AuthService } from '../services/auth.service.js';
+import { AuthService } from '../services/auth.service';
 
 const buildPrisma = () => {
   const prisma: Partial<PrismaClient> = {

@@ -1,12 +1,12 @@
 import { NotificationType, OrderEventType, OrderStatus, PrismaClient } from '@prisma/client';
-import { OrderRepository } from '../repositories/order.repository.js';
+import { OrderRepository } from '../repositories/order.repository';
 
 describe('OrderRepository', () => {
   it('creates an order and emits a notification inside a transaction', async () => {
     const orderRecord = {
       id: 'order-1',
       status: OrderStatus.PENDING,
-      listing: { title: 'Test Listing' }
+      listing: { title: 'Test Listing' },
     } as const;
 
     const orderCreateMock = jest.fn().mockResolvedValue(orderRecord);
@@ -14,17 +14,17 @@ describe('OrderRepository', () => {
 
     const transactionClient = {
       order: { create: orderCreateMock },
-      notification: { create: notificationCreateMock }
+      notification: { create: notificationCreateMock },
     };
 
     const transactionMock = jest
       .fn()
       .mockImplementation(async (callback: (tx: typeof transactionClient) => Promise<unknown>) =>
-        callback(transactionClient as unknown as Parameters<typeof callback>[0])
+        callback(transactionClient as unknown as Parameters<typeof callback>[0]),
       );
 
     const prisma = {
-      $transaction: transactionMock
+      $transaction: transactionMock,
     } as unknown as PrismaClient;
 
     const repository = new OrderRepository(prisma);
@@ -34,29 +34,33 @@ describe('OrderRepository', () => {
       buyerId: 'buyer-1',
       sellerId: 'seller-1',
       offerId: 'offer-1',
-      totalAmount: '199.99'
+      totalAmount: '199.99',
     });
 
     expect(result).toBe(orderRecord);
     expect(orderCreateMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({ listingId: 'listing-1', buyerId: 'buyer-1', sellerId: 'seller-1' })
-      })
+        data: expect.objectContaining({
+          listingId: 'listing-1',
+          buyerId: 'buyer-1',
+          sellerId: 'seller-1',
+        }),
+      }),
     );
     expect(notificationCreateMock).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
           userId: 'seller-1',
-          type: NotificationType.ORDER_UPDATED
-        })
-      })
+          type: NotificationType.ORDER_UPDATED,
+        }),
+      }),
     );
   });
 
   it('adds a timeline event for an order', async () => {
     const timelineCreateMock = jest.fn().mockResolvedValue({ id: 'timeline-1' });
     const prisma = {
-      orderTimelineEvent: { create: timelineCreateMock }
+      orderTimelineEvent: { create: timelineCreateMock },
     } as unknown as PrismaClient;
 
     const repository = new OrderRepository(prisma);
@@ -64,8 +68,8 @@ describe('OrderRepository', () => {
 
     expect(timelineCreateMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: { orderId: 'order-1', type: OrderEventType.NOTE, detail: 'Message' }
-      })
+        data: { orderId: 'order-1', type: OrderEventType.NOTE, detail: 'Message' },
+      }),
     );
   });
 });

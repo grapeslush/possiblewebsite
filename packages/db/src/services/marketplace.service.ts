@@ -6,13 +6,13 @@ import {
   PaymentStatus,
   PrismaClient,
 } from '@prisma/client';
-import { DisputeRepository } from '../repositories/dispute.repository.js';
-import { ListingRepository } from '../repositories/listing.repository.js';
-import { OfferRepository } from '../repositories/offer.repository.js';
-import { OrderRepository } from '../repositories/order.repository.js';
-import { CartRepository } from '../repositories/cart.repository.js';
-import { PaymentRepository } from '../repositories/payment.repository.js';
-import { PayoutRepository } from '../repositories/payout.repository.js';
+import { DisputeRepository } from '../repositories/dispute.repository';
+import { ListingRepository } from '../repositories/listing.repository';
+import { OfferRepository } from '../repositories/offer.repository';
+import { OrderRepository } from '../repositories/order.repository';
+import { CartRepository } from '../repositories/cart.repository';
+import { PaymentRepository } from '../repositories/payment.repository';
+import { PayoutRepository } from '../repositories/payout.repository';
 
 export interface AcceptOfferOptions {
   shippingAddressId?: string | null;
@@ -177,7 +177,7 @@ export class MarketplaceService {
       throw new Error('Cart is empty');
     }
 
-    const firstItem = items[0];
+    const firstItem = items[0]!;
     const sellerId = firstItem.listing.sellerId;
     const total = items.reduce((acc, item) => acc + Number(item.unitPrice) * item.quantity, 0);
     const order = await this.orders.createOrder({
@@ -205,7 +205,7 @@ export class MarketplaceService {
 
     await this.payouts.createPendingPayout(order.id, sellerId, total, order.currency);
 
-    await this.carts.clearCart(items[0].cartId);
+    await this.carts.clearCart(firstItem.cartId);
     return order;
   }
 

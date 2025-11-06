@@ -1,5 +1,5 @@
 import { PrismaClient, ReviewStatus } from '@prisma/client';
-import { ReviewRepository } from '../repositories/review.repository.js';
+import { ReviewRepository } from '../repositories/review.repository';
 
 describe('ReviewRepository', () => {
   it('records moderation decisions with status updates', async () => {

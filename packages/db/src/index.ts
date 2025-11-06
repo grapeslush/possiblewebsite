@@ -1,22 +1,35 @@
-export { prisma } from './prisma.js';
-export { UserRepository } from './repositories/user.repository.js';
-export { ListingRepository } from './repositories/listing.repository.js';
-export { OfferRepository } from './repositories/offer.repository.js';
-export { OrderRepository } from './repositories/order.repository.js';
-export { DisputeRepository } from './repositories/dispute.repository.js';
-export { CartRepository } from './repositories/cart.repository.js';
-export { PaymentRepository } from './repositories/payment.repository.js';
-export { PayoutRepository } from './repositories/payout.repository.js';
-export { AuditRepository } from './repositories/audit.repository.js';
-export { NotificationSettingRepository } from './repositories/notification-setting.repository.js';
-export { ReviewRepository } from './repositories/review.repository.js';
-export { MarketplaceService } from './services/marketplace.service.js';
-export { AuthService } from './services/auth.service.js';
-export type { CreateUserInput } from './repositories/user.repository.js';
+export { prisma } from './prisma';
+export {
+  AddressType,
+  ListingStatus,
+  NotificationType,
+  OrderEventType,
+  OrderStatus,
+  PaymentStatus,
+  ReviewStatus,
+  ShipmentStatus,
+  ShipmentTrackingStatus,
+  type PolicyAcceptance,
+  type TotpDevice,
+} from '@prisma/client';
+export { UserRepository } from './repositories/user.repository';
+export { ListingRepository } from './repositories/listing.repository';
+export { OfferRepository } from './repositories/offer.repository';
+export { OrderRepository } from './repositories/order.repository';
+export { DisputeRepository } from './repositories/dispute.repository';
+export { CartRepository } from './repositories/cart.repository';
+export { PaymentRepository } from './repositories/payment.repository';
+export { PayoutRepository } from './repositories/payout.repository';
+export { AuditRepository } from './repositories/audit.repository';
+export { NotificationSettingRepository } from './repositories/notification-setting.repository';
+export { ReviewRepository } from './repositories/review.repository';
+export { MarketplaceService } from './services/marketplace.service';
+export { AuthService } from './services/auth.service';
+export type { CreateUserInput } from './repositories/user.repository';
 export type {
   CreateListingInput,
   ListingFilters,
   SearchFilters,
-} from './repositories/listing.repository.js';
-export type { CreateOfferInput } from './repositories/offer.repository.js';
-export type { CreateOrderInput } from './repositories/order.repository.js';
+} from './repositories/listing.repository';
+export type { CreateOfferInput } from './repositories/offer.repository';
+export type { CreateOrderInput } from './repositories/order.repository';

@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 
 export interface CreateAuditLogInput {
   actorId?: string | null;
@@ -18,7 +18,7 @@ export class AuditRepository {
         entity: input.entity,
         entityId: input.entityId,
         action: input.action,
-        metadata: input.metadata ?? undefined,
+        metadata: input.metadata as Prisma.InputJsonValue | undefined,
       },
     });
   }

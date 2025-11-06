@@ -1,5 +1,5 @@
-import { PirateShipAdapter } from './pirate-ship.js';
-import type { ShippingProvider } from './provider.js';
+import { PirateShipAdapter } from './pirate-ship';
+import type { ShippingProvider } from './provider';
 
 let provider: ShippingProvider | null = null;
 
@@ -16,5 +16,5 @@ export const getShippingProvider = (): ShippingProvider => {
   return provider;
 };
 
-export * from './provider.js';
-export { PirateShipAdapter } from './pirate-ship.js';
+export * from './provider';
+export { PirateShipAdapter } from './pirate-ship';
