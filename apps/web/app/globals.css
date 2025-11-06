@@ -3,12 +3,27 @@
 @tailwind utilities;
 
 :root {
-  --background: 255 255 255;
-  --foreground: 17 17 17;
+  --background: 8 8 8;
+  --foreground: 241 245 249;
   --primary: 246 15 32;
   --secondary: 27 32 110;
+  --muted: 15 23 42;
+  --card: 15 23 42;
+  --border: 255 255 255;
+  color-scheme: dark;
 }
 
 body {
-  @apply bg-white font-sans text-brand-accent;
+  @apply bg-neutral-950 font-sans text-neutral-100 antialiased;
+  background-image: radial-gradient(circle at top, rgba(246, 15, 32, 0.1), transparent 65%);
+  min-height: 100vh;
+}
+
+a {
+  @apply text-brand-primary underline-offset-4 transition hover:underline;
+}
+
+::selection {
+  background-color: rgba(246, 15, 32, 0.6);
+  color: #fff;
 }

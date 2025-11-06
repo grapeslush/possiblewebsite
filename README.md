@@ -2,6 +2,11 @@
 
 Possible Website is an end-to-end marketplace reference stack. The monorepo contains a customer-facing web application, a feature-rich API, shared Prisma models, and infrastructure scaffolding. Observability is first-class with Pino logging, OpenTelemetry tracing, and Prometheus metrics enabled across services.
 
+Whether you are a product manager exploring the experience or an engineer preparing to ship code, the repository now ships with two complementary guides:
+
+- **Non-technical onboarding:** `docs/USER_GUIDE.md` walks through prerequisites, one-click Docker setup, and how to explore the product without writing code.
+- **Technical deep dive:** `docs/TECHNICAL_OVERVIEW.md` explains architecture decisions, CI/CD, data flows, and operational playbooks for engineers.
+
 ## Repository layout
 
 | Path                             | Description                                                                    |
@@ -13,7 +18,29 @@ Possible Website is an end-to-end marketplace reference stack. The monorepo cont
 | `docs/`                          | Product documentation, OpenAPI spec, ER diagram, and test artifacts.           |
 | `infra/terraform`                | Terraform skeleton ready for AWS deployment.                                   |
 
-## Development quick start
+## Quick start options
+
+### Non-technical preview
+
+1. Install [Docker Desktop](https://www.docker.com/products/docker-desktop/) and ensure it is running.
+2. Copy `.env.example` to `.env` in the repository root. Only the `DATABASE_URL` entry is required for the demo; leave the suggested value untouched to use the bundled Postgres container.
+3. Launch the full platform:
+
+   ```bash
+   docker compose up --build
+   ```
+
+4. Visit the following URLs:
+   - Web UI: <http://localhost:3000>
+   - API playground: <http://localhost:4000>
+   - MailHog inbox: <http://localhost:8025>
+   - MinIO Console: <http://localhost:9001>
+
+5. When finished, press `Ctrl+C` in the terminal and run `docker compose down` to tear everything down.
+
+Refer to the "Product tour" section in `docs/USER_GUIDE.md` for a curated walkthrough of the marketplace flows.
+
+### Development quick start
 
 1. Install dependencies with `pnpm install`.
 2. Copy `.env.example` to `.env` (or export environment variables) and set `DATABASE_URL`, `REDIS_URL`, and any provider keys.
@@ -31,15 +58,7 @@ Possible Website is an end-to-end marketplace reference stack. The monorepo cont
    pnpm dev:api   # http://localhost:3001 (set PORT before running)
    ```
 
-### Docker-based workflow
-
-Use the provided compose stack to bring up the full platform (web, API, PostgreSQL, Redis, MailHog, and MinIO) in one command:
-
-```bash
-docker compose up --build
-```
-
-The web UI is available at <http://localhost:3000>, the API at <http://localhost:4000>, MailHog at <http://localhost:8025>, and MinIO Console at <http://localhost:9001>.
+> Prefer containers? The non-technical preview flow above uses the same Compose stack that engineers can adopt for parity with production-like services.
 
 ## Observability
 
@@ -71,4 +90,4 @@ Playwright trace artifacts for recent runs are stored in `docs/playwright-traces
 - **Seed data instructions:** `docs/seed-instructions.md`
 - **Playwright traces and usage:** `docs/playwright-traces/`
 
-Refer to `infra/terraform/README.md` for infrastructure-as-code guidance.
+Refer to `infra/terraform/README.md` for infrastructure-as-code guidance and the security posture outlined in `docs/SECURITY.md`.
