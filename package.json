@@ -2,13 +2,17 @@
   "name": "possiblewebsite",
   "private": true,
   "version": "0.1.0",
-  "packageManager": "pnpm@8.15.5",
+  "packageManager": "npm@10.5.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev:web": "pnpm --filter web dev",
-    "dev:api": "pnpm --filter api dev",
-    "build": "pnpm -r build",
-    "lint": "pnpm -r lint",
-    "test": "pnpm -r test --if-present",
+    "dev:web": "npm run dev --workspace web",
+    "dev:api": "npm run dev --workspace api",
+    "build": "npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
     "prettier": "prettier --ignore-path .gitignore",
     "prepare": "husky install"
   },
@@ -23,11 +27,11 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,cts,mts}": [
-      "pnpm exec eslint --fix --max-warnings=0",
-      "pnpm exec prettier --write"
+      "npx eslint --fix --max-warnings=0",
+      "npx prettier --write"
     ],
     "*{.json,.md,.cjs,.mjs,.yml,.yaml,.css,.html}": [
-      "pnpm exec prettier --write"
+      "npx prettier --write"
     ]
   }
 }

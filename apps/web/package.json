@@ -10,7 +10,7 @@
     "test": "echo 'No tests yet'"
   },
   "dependencies": {
-    "@possiblewebsite/config": "workspace:^",
+    "@possiblewebsite/config": "file:../../packages/config",
     "@radix-ui/react-slot": "^1.0.2",
     "autoprefixer": "^10.4.17",
     "class-variance-authority": "^0.7.0",

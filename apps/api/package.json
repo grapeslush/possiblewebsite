@@ -10,7 +10,7 @@
     "test": "echo 'No tests yet'"
   },
   "dependencies": {
-    "@possiblewebsite/config": "workspace:^",
+    "@possiblewebsite/config": "file:../../packages/config",
     "next": "14.1.0",
     "react": "18.2.0",
     "react-dom": "18.2.0"
