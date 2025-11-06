@@ -1,23 +1,23 @@
-# Possible Website Monorepo
+# Tackle Exchange Monorepo
 
-Possible Website is an end-to-end marketplace reference stack. The monorepo contains a customer-facing web application, a feature-rich API, shared Prisma models, and infrastructure scaffolding. Observability is first-class with Pino logging, OpenTelemetry tracing, and Prometheus metrics enabled across services.
+Tackle Exchange is a reference marketplace built for buying and selling used fishing tackle. The monorepo showcases a Next.js 14 customer experience, a typed API surface, shared Prisma models, and infrastructure scaffolding that highlight escrow workflows, safety reviews, and marketplace analytics tailored to anglers.
 
 ## Repository layout
 
-| Path                             | Description                                                                    |
-| -------------------------------- | ------------------------------------------------------------------------------ |
-| `apps/web`                       | Next.js 14 web app with help center content, policies, and buyer/seller flows. |
-| `apps/api`                       | Next.js API workspace exposing commerce endpoints with tracing and metrics.    |
-| `packages/db`                    | Prisma schema, migrations, and seed script used by both applications.          |
-| `packages/config`, `packages/ui` | Shared tooling configuration and UI primitives.                                |
-| `docs/`                          | Product documentation, OpenAPI spec, ER diagram, and test artifacts.           |
-| `infra/terraform`                | Terraform skeleton ready for AWS deployment.                                   |
+| Path                             | Description                                                                                |
+| -------------------------------- | ------------------------------------------------------------------------------------------ |
+| `apps/web`                       | Next.js 14 web app featuring the Tackle Exchange marketplace, help center, and policy hub. |
+| `apps/api`                       | API workspace that powers escrow, messaging, and payout flows with distributed tracing.    |
+| `packages/db`                    | Prisma schema, migrations, and seed helpers reused across services.                        |
+| `packages/config`, `packages/ui` | Shared tooling configuration and UI primitives.                                            |
+| `docs/`                          | Product collateral, API contract, ER diagram, and testing artifacts.                       |
+| `infra/terraform`                | Terraform starter kit for provisioning the platform in AWS.                                |
 
 ## Development quick start
 
 1. Install dependencies with `pnpm install`.
-2. Copy `.env.example` to `.env` (or export environment variables) and set `DATABASE_URL`, `REDIS_URL`, and any provider keys.
-3. Apply database migrations and seed demo data:
+2. Copy `.env.example` to `.env` (or export environment variables) and set `DATABASE_URL`, `REDIS_URL`, and provider keys for mail, storage, and hCaptcha.
+3. Apply database migrations and seed demo inventory:
 
    ```bash
    pnpm --filter @possiblewebsite/db run prisma:migrate
@@ -33,26 +33,26 @@ Possible Website is an end-to-end marketplace reference stack. The monorepo cont
 
 ### Docker-based workflow
 
-Use the provided compose stack to bring up the full platform (web, API, PostgreSQL, Redis, MailHog, and MinIO) in one command:
+Use the provided compose stack to bring up the entire platform—web, API, PostgreSQL, Redis, MailHog, and MinIO—with one command:
 
 ```bash
 docker compose up --build
 ```
 
-The web UI is available at <http://localhost:3000>, the API at <http://localhost:4000>, MailHog at <http://localhost:8025>, and MinIO Console at <http://localhost:9001>.
+The web UI is available at <http://localhost:3000>, the API at <http://localhost:4000>, MailHog at <http://localhost:8025>, and the MinIO Console at <http://localhost:9001>.
 
 ## Observability
 
-Both applications share a consistent observability toolchain:
+Both applications share a consistent observability toolchain tuned for marketplace debugging:
 
 - **Pino** structured logging with pretty transport in development.
-- **OpenTelemetry** spans emitted via a Node tracer provider (instrumentation hooks live in `apps/*/lib/observability.ts`).
-- **Prometheus** metrics exposed at `/api/metrics` in each app.
-- Health and readiness endpoints (`/api/health`, `/api/readiness`) provide JSON status for orchestrators.
+- **OpenTelemetry** spans emitted via a Node tracer provider (`apps/*/instrumentation.ts`).
+- **Prometheus** metrics available at `/api/metrics`.
+- JSON health and readiness endpoints (`/api/health`, `/api/readiness`) suitable for container orchestrators.
 
 ## Testing & CI
 
-The GitHub Actions workflow runs migrations, linting, unit tests, Playwright end-to-end tests (with trace uploads), Lighthouse CI, dependency audits, and k6 smoke tests. To mimic the pipeline locally:
+The GitHub Actions workflow runs migrations, linting, unit tests, Playwright end-to-end suites (with trace uploads), Lighthouse CI, dependency audits, and k6 smoke tests. To mimic the pipeline locally:
 
 ```bash
 pnpm lint
@@ -62,13 +62,15 @@ pnpm exec lhci autorun --collect.startServerCommand="pnpm --filter web dev"
 pnpm dlx k6@0.48.0 run tests/k6/smoke.js
 ```
 
-Playwright trace artifacts for recent runs are stored in `docs/playwright-traces/` for quick debugging.
+Playwright trace artifacts for recent runs live in `docs/playwright-traces/` for quick debugging.
 
 ## Documentation
 
+- **User guide:** `docs/USER_GUIDE.md`
+- **Technical overview:** `docs/TECHNICAL_OVERVIEW.md`
+- **Security posture:** `docs/SECURITY.md`
 - **API contract:** `docs/openapi.yaml`
 - **Data model ERD:** `docs/erd.md`
 - **Seed data instructions:** `docs/seed-instructions.md`
-- **Playwright traces and usage:** `docs/playwright-traces/`
 
-Refer to `infra/terraform/README.md` for infrastructure-as-code guidance.
+Refer to `infra/terraform/README.md` for infrastructure-as-code guidance. Package scopes continue to use the `@possiblewebsite/*` naming convention for compatibility with existing tooling.

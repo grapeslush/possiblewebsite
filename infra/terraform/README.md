@@ -1,6 +1,6 @@
 # Terraform infrastructure skeleton
 
-This directory contains a starter Terraform configuration that you can extend to deploy Possible Website in AWS. It currently provisions a virtual private cloud (VPC) using the `hashicorp/vpc` module and exposes variables for region and subnet layout.
+This directory contains a starter Terraform configuration that you can extend to deploy Tackle Exchange in AWS. It currently provisions a virtual private cloud (VPC) using the `hashicorp/vpc` module and exposes variables for region and subnet layout.
 
 ## Getting started
 

@@ -6,7 +6,7 @@ import { helpArticles, helpCategories } from '@/data/knowledge-base';
 
 export const metadata: Metadata = {
   title: 'Help Center',
-  description: 'Step-by-step guides for buyers and sellers using the Possible Website marketplace.',
+  description: 'Step-by-step guides for buyers and sellers using the Tackle Exchange marketplace.',
 };
 
 export default function HelpCenterPage() {
@@ -21,10 +21,12 @@ export default function HelpCenterPage() {
         <span className="rounded-full bg-brand-secondary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.4em] text-brand-secondary">
           Support hub
         </span>
-        <h1 className="mt-4 text-4xl font-bold text-neutral-900">How can we help today?</h1>
+        <h1 className="mt-4 text-4xl font-bold text-neutral-900">
+          Need a hand with your next trade?
+        </h1>
         <p className="mt-3 text-lg text-neutral-600">
-          Browse curated guides, policy highlights, and best practices for running your business on
-          Possible Website.
+          Browse curated guides, safety tips, and policy highlights designed for anglers trading
+          through Tackle Exchange.
         </p>
       </header>
 

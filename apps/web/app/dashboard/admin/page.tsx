@@ -3,33 +3,33 @@ import AdminDashboardClient from './admin-dashboard-client';
 
 const users = [
   {
-    id: 'user-1101',
-    name: 'Avery Johnson',
-    email: 'avery@possiblecommerce.com',
+    id: 'angler-221',
+    name: 'Harper Diaz',
+    email: 'harper@tackle.exchange',
     role: 'SELLER',
     risk: 'Medium',
     totalGmv: '$128k',
   },
   {
-    id: 'user-1102',
-    name: 'Morgan Patel',
-    email: 'morgan@possiblecommerce.com',
+    id: 'angler-222',
+    name: 'Mason Lee',
+    email: 'mason@tackle.exchange',
     role: 'BUYER',
     risk: 'Low',
     totalGmv: '$9.3k',
   },
   {
-    id: 'user-1103',
-    name: 'Taylor Wright',
-    email: 'taylor@possiblecommerce.com',
+    id: 'angler-223',
+    name: 'Asha Patel',
+    email: 'asha@tackle.exchange',
     role: 'SELLER',
     risk: 'High',
     totalGmv: '$302k',
   },
   {
-    id: 'user-1104',
+    id: 'staff-101',
     name: 'Jordan Smith',
-    email: 'jordan@possiblecommerce.com',
+    email: 'jordan@support.tackle.exchange',
     role: 'SUPPORT',
     risk: 'Low',
     totalGmv: '$0',
@@ -38,78 +38,83 @@ const users = [
 
 const listings = [
   {
-    id: 'listing-501',
-    title: 'Luxury leather weekender bag',
-    seller: 'Taylor Wright',
-    reason: 'AI flagged duplicate imagery across marketplaces',
+    id: 'listing-reef-901',
+    title: 'Offshore jigging combo (custom Calstar + Talica)',
+    seller: 'Asha Patel',
+    reason: 'Serial number mismatch flagged during verification',
   },
   {
-    id: 'listing-502',
-    title: 'Rare vinyl: Sunrise Collective',
-    seller: 'Avery Johnson',
-    reason: 'Buyer dispute referencing counterfeit pressing',
+    id: 'listing-river-447',
+    title: 'Vintage fly lot with bamboo rod and Hardy reel',
+    seller: 'Harper Diaz',
+    reason: 'Buyer reported undisclosed repair on stripping guide',
   },
 ];
 
 const disputes = [
   {
-    id: 'dispute-3301',
-    order: '#MKT-12428',
+    id: 'dispute-hex-3301',
+    order: '#TX-12428',
     buyer: 'Leah Cole',
-    seller: 'Taylor Wright',
-    summary: 'Buyer reports lamp arrived damaged; images uploaded',
+    seller: 'Asha Patel',
+    summary: 'Buyer uploaded inspection video showing bent rod ferrule',
     priority: 'High',
   },
   {
-    id: 'dispute-3302',
-    order: '#MKT-12112',
+    id: 'dispute-hex-3302',
+    order: '#TX-12112',
     buyer: 'David Kim',
-    seller: 'Morgan Patel',
-    summary: 'Item lost in transit; carrier shows investigation in progress',
+    seller: 'Mason Lee',
+    summary: 'Electronics bundle delayed; carrier investigating weather hold',
     priority: 'Medium',
   },
 ];
 
 const financialSnapshots = [
-  { label: 'Net GMV (30d)', value: '$1.82M' },
-  { label: 'Payouts released', value: '$1.47M' },
-  { label: 'Fees captured', value: '$182k' },
-  { label: 'Refunds issued', value: '$64k' },
+  { label: 'Net GMV (30d)', value: '$1.92M' },
+  { label: 'Escrow released', value: '$1.53M' },
+  { label: 'Fees captured', value: '$192k' },
+  { label: 'Refunds issued', value: '$72k' },
 ];
 
 const webhookEvents = [
   {
-    id: 'evt-9101',
-    event: 'order.fulfilled',
+    id: 'evt-reef-9101',
+    event: 'escrow.released',
     status: 'success',
-    deliveredAt: '2024-03-13T12:12:00Z',
+    deliveredAt: '2024-05-13T12:12:00Z',
   },
-  { id: 'evt-9102', event: 'payout.failed', status: 'failed', deliveredAt: '2024-03-12T08:07:00Z' },
   {
-    id: 'evt-9103',
+    id: 'evt-reef-9102',
+    event: 'payout.failed',
+    status: 'failed',
+    deliveredAt: '2024-05-12T08:07:00Z',
+  },
+  {
+    id: 'evt-reef-9103',
     event: 'listing.reviewed',
     status: 'success',
-    deliveredAt: '2024-03-11T18:40:00Z',
+    deliveredAt: '2024-05-11T18:40:00Z',
   },
 ];
 
 const featureFlags = [
   {
     key: 'ai_pricing_beta',
-    name: 'AI Pricing beta',
-    description: 'Enable experimental pricing recommendations',
+    name: 'AI tackle pricing beta',
+    description: 'Enable experimental pricing recommendations tuned for rod and reel categories',
     enabled: true,
   },
   {
-    key: 'instant_payouts',
-    name: 'Instant payouts',
-    description: 'Allow qualified sellers to request instant settlement',
+    key: 'express_payouts',
+    name: 'Express payouts',
+    description: 'Allow verified captains and shops to request instant settlement',
     enabled: false,
   },
   {
     key: 'auto_escalate_disputes',
     name: 'Auto escalate disputes',
-    description: 'Automatically escalate disputes with high risk signals',
+    description: 'Automatically escalate inspections with high-risk tackle signals to specialists',
     enabled: false,
   },
 ];

@@ -1,11 +1,11 @@
 openapi: 3.1.0
 info:
-  title: Possible Website API
+  title: Tackle Exchange API
   version: 1.0.0
   description: |
-    REST API surface for the Possible Website marketplace. Endpoints follow JSON conventions and use bearer tokens for authentication.
+    REST API surface for the Tackle Exchange marketplace. Endpoints follow JSON conventions and use bearer tokens for authentication.
 servers:
-  - url: https://api.possiblewebsite.test
+  - url: https://api.tackle.exchange
     description: Production
   - url: http://localhost:4000
     description: Local development
