@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@possiblewebsite/config": "file:../../packages/config",
     "@possiblewebsite/config": "workspace:^",
     "@possiblewebsite/db": "workspace:^",
     "bullmq": "^4.12.2",

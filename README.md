@@ -1,6 +1,6 @@
 # Possible Website Monorepo
 
-This repository is a pnpm workspace that powers both the customer-facing web experience and the API surface for Possible Website. It uses Next.js 14 with the App Router, TypeScript, Tailwind CSS, and shadcn/ui.
+This repository is an npm workspace that powers both the customer-facing web experience and the API surface for Possible Website. It uses Next.js 14 with the App Router, TypeScript, Tailwind CSS, and shadcn/ui.
 
 ## Structure
 
@@ -13,15 +13,15 @@ This repository is a pnpm workspace that powers both the customer-facing web exp
 ## Getting started
 
 ```bash
-pnpm install
-pnpm dev:web
+npm install
+npm run dev:web
 ```
 
 Run linting and tests across all workspaces:
 
 ```bash
-pnpm lint
-pnpm test
+npm run lint
+npm run test
 ```
 
 Husky hooks enforce formatting (via lint-staged) and commit message conventions (via commitlint). A GitHub Actions workflow runs linting and tests for every push and pull request to `main`.
