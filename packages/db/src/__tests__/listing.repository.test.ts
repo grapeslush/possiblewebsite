@@ -1,9 +1,11 @@
 import { ListingStatus, PrismaClient } from '@prisma/client';
-import { ListingRepository } from '../repositories/listing.repository.js';
+import { ListingRepository } from '../repositories/listing.repository';
 
 describe('ListingRepository', () => {
   it('publishes a listing by setting the correct status and timestamp', async () => {
-    const updateMock = jest.fn().mockResolvedValue({ id: 'listing-1', status: ListingStatus.ACTIVE });
+    const updateMock = jest
+      .fn()
+      .mockResolvedValue({ id: 'listing-1', status: ListingStatus.ACTIVE });
     const prisma = { listing: { update: updateMock } } as unknown as PrismaClient;
     const repository = new ListingRepository(prisma);
 
@@ -12,8 +14,8 @@ describe('ListingRepository', () => {
     expect(updateMock).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { id: 'listing-1' },
-        data: expect.objectContaining({ status: ListingStatus.ACTIVE })
-      })
+        data: expect.objectContaining({ status: ListingStatus.ACTIVE }),
+      }),
     );
   });
 
@@ -29,10 +31,10 @@ describe('ListingRepository', () => {
         where: expect.objectContaining({
           sellerId: 'seller-1',
           OR: expect.arrayContaining([
-            expect.objectContaining({ title: expect.objectContaining({ contains: 'vintage' }) })
-          ])
-        })
-      })
+            expect.objectContaining({ title: expect.objectContaining({ contains: 'vintage' }) }),
+          ]),
+        }),
+      }),
     );
   });
 });

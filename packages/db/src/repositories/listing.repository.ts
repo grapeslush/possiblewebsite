@@ -1,5 +1,5 @@
 import { ListingStatus, Prisma, PrismaClient } from '@prisma/client';
-import { toDecimal } from '../utils/decimal.js';
+import { toDecimal } from '../utils/decimal';
 
 export interface CreateListingInput {
   sellerId: string;
@@ -50,14 +50,14 @@ export class ListingRepository {
                 url: image.url,
                 altText: image.altText ?? null,
                 position: image.position ?? index,
-                isPrimary: image.isPrimary ?? index === 0
-              }))
+                isPrimary: image.isPrimary ?? index === 0,
+              })),
             }
-          : undefined
+          : undefined,
       },
       include: {
-        images: true
-      }
+        images: true,
+      },
     });
   }
 
@@ -66,8 +66,8 @@ export class ListingRepository {
       where: { id: listingId },
       data: {
         status: ListingStatus.ACTIVE,
-        publishedAt: new Date()
-      }
+        publishedAt: new Date(),
+      },
     });
   }
 
@@ -76,8 +76,8 @@ export class ListingRepository {
       where: { id: listingId },
       data: {
         status: ListingStatus.ARCHIVED,
-        archivedAt: new Date()
-      }
+        archivedAt: new Date(),
+      },
     });
   }
 
@@ -90,26 +90,26 @@ export class ListingRepository {
         OR: filters.searchTerm
           ? [
               { title: { contains: filters.searchTerm, mode: 'insensitive' } },
-              { description: { contains: filters.searchTerm, mode: 'insensitive' } }
+              { description: { contains: filters.searchTerm, mode: 'insensitive' } },
             ]
-          : undefined
+          : undefined,
       },
       include: {
         seller: {
           select: {
             id: true,
-            displayName: true
-          }
+            displayName: true,
+          },
         },
         images: {
           orderBy: {
-            position: 'asc'
-          }
-        }
+            position: 'asc',
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: 'desc',
+      },
     });
   }
 
@@ -122,11 +122,11 @@ export class ListingRepository {
           orderBy: { createdAt: 'desc' },
           include: {
             buyer: {
-              select: { id: true, displayName: true }
-            }
-          }
-        }
-      }
+              select: { id: true, displayName: true },
+            },
+          },
+        },
+      },
     });
   }
 
@@ -136,7 +136,7 @@ export class ListingRepository {
       include: {
         seller: true,
         images: {
-          orderBy: { position: 'asc' }
+          orderBy: { position: 'asc' },
         },
         offers: {
           orderBy: { createdAt: 'desc' },
@@ -145,12 +145,12 @@ export class ListingRepository {
               select: {
                 id: true,
                 displayName: true,
-                avatarUrl: true
-              }
-            }
-          }
-        }
-      }
+                avatarUrl: true,
+              },
+            },
+          },
+        },
+      },
     });
   }
 
@@ -163,8 +163,8 @@ export class ListingRepository {
       category: filters.category,
       price: {
         gte: filters.minPrice ? new Prisma.Decimal(filters.minPrice) : undefined,
-        lte: filters.maxPrice ? new Prisma.Decimal(filters.maxPrice) : undefined
-      }
+        lte: filters.maxPrice ? new Prisma.Decimal(filters.maxPrice) : undefined,
+      },
     };
 
     if (!hasTerm) {
@@ -172,17 +172,14 @@ export class ListingRepository {
         where: baseWhere,
         include: {
           seller: {
-            select: { id: true, displayName: true, avatarUrl: true }
+            select: { id: true, displayName: true, avatarUrl: true },
           },
           images: {
-            orderBy: { position: 'asc' }
-          }
+            orderBy: { position: 'asc' },
+          },
         },
-        orderBy: [
-          { publishedAt: 'desc' },
-          { createdAt: 'desc' }
-        ],
-        take: limit
+        orderBy: [{ publishedAt: 'desc' }, { createdAt: 'desc' }],
+        take: limit,
       });
     }
 
@@ -209,12 +206,12 @@ export class ListingRepository {
         where: { id: { in: ids } },
         include: {
           seller: {
-            select: { id: true, displayName: true, avatarUrl: true }
+            select: { id: true, displayName: true, avatarUrl: true },
           },
           images: {
-            orderBy: { position: 'asc' }
-          }
-        }
+            orderBy: { position: 'asc' },
+          },
+        },
       });
 
       const listingById = new Map(listings.map((listing) => [listing.id, listing]));
@@ -228,19 +225,19 @@ export class ListingRepository {
           ...baseWhere,
           OR: [
             { title: { contains: filters.term ?? '', mode: 'insensitive' } },
-            { description: { contains: filters.term ?? '', mode: 'insensitive' } }
-          ]
+            { description: { contains: filters.term ?? '', mode: 'insensitive' } },
+          ],
         },
         include: {
           seller: {
-            select: { id: true, displayName: true, avatarUrl: true }
+            select: { id: true, displayName: true, avatarUrl: true },
           },
           images: {
-            orderBy: { position: 'asc' }
-          }
+            orderBy: { position: 'asc' },
+          },
         },
         orderBy: { createdAt: 'desc' },
-        take: limit
+        take: limit,
       });
     }
   }

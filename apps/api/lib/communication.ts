@@ -1,6 +1,6 @@
 import { NotificationType } from '@prisma/client';
-import { emailClient } from './email.js';
-import { auditLogs, notificationSettings, prisma } from './services.js';
+import { emailClient } from './email';
+import { auditLogs, notificationSettings, prisma } from './services';
 
 interface Participant {
   id: string;

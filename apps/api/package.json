@@ -12,10 +12,13 @@
   "dependencies": {
     "@possiblewebsite/config": "workspace:^",
     "@possiblewebsite/db": "workspace:^",
+    "@prisma/client": "^5.11.0",
     "@opentelemetry/api": "^1.8.0",
     "@opentelemetry/resources": "^1.25.1",
     "@opentelemetry/sdk-trace-base": "^1.25.1",
     "@opentelemetry/sdk-trace-node": "^1.25.1",
+    "@opentelemetry/semantic-conventions": "^1.25.1",
+    "@aws-sdk/client-s3": "^3.525.0",
     "@sendgrid/mail": "^7.7.0",
     "bullmq": "^4.12.2",
     "ioredis": "^5.3.2",

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { NotificationType } from '@prisma/client';
 import { z } from 'zod';
-import { notificationSettings } from '../../../../lib/services.js';
+import { notificationSettings } from '../../../../lib/services';
 
 const updateSchema = z.object({
   userId: z.string(),

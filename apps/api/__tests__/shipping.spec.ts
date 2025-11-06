@@ -62,13 +62,13 @@ jest.mock('@possiblewebsite/db', () => ({
 
 const enqueueShipmentTrackingPoll = jest.fn();
 
-jest.mock('../lib/queues.js', () => ({
+jest.mock('../lib/queues', () => ({
   enqueueShipmentTrackingPoll,
 }));
 
 const releasePayoutForOrder = jest.fn();
 
-jest.mock('../lib/payouts.js', () => ({
+jest.mock('../lib/payouts', () => ({
   releasePayoutForOrder,
 }));
 
@@ -77,17 +77,17 @@ const mockProvider = {
   parseWebhookEvent: jest.fn(),
 };
 
-jest.mock('../lib/shipping/index.js', () => ({
+jest.mock('../lib/shipping/index', () => ({
   getShippingProvider: () => mockProvider,
 }));
 
 let ShipmentStatus: any;
 let ShipmentTrackingStatus: any;
-let applyTrackingUpdate: (typeof import('../lib/shipping/service.js'))['applyTrackingUpdate'];
+let applyTrackingUpdate: (typeof import('../lib/shipping/service'))['applyTrackingUpdate'];
 
 beforeAll(async () => {
   ({ ShipmentStatus, ShipmentTrackingStatus } = await import('@prisma/client'));
-  ({ applyTrackingUpdate } = await import('../lib/shipping/service.js'));
+  ({ applyTrackingUpdate } = await import('../lib/shipping/service'));
 });
 
 const resetMocks = () => {

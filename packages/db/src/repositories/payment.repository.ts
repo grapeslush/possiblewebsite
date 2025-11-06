@@ -1,5 +1,5 @@
 import { PaymentStatus, Prisma, PrismaClient } from '@prisma/client';
-import { toDecimal } from '../utils/decimal.js';
+import { toDecimal } from '../utils/decimal';
 
 export interface UpsertPaymentInput {
   orderId: string;
@@ -86,7 +86,7 @@ export class PaymentRepository {
         status: input.status,
         amount: toDecimal(input.amount),
         currency: input.currency ?? 'USD',
-        metadata: input.metadata ?? undefined,
+        metadata: input.metadata as Prisma.InputJsonValue | undefined,
       },
     });
   }

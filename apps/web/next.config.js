@@ -2,8 +2,9 @@
 const nextConfig = {
   reactStrictMode: true,
   experimental: {
-    typedRoutes: true
-  }
+    typedRoutes: true,
+  },
+  transpilePackages: ['@possiblewebsite/db'],
 };
 
 module.exports = nextConfig;

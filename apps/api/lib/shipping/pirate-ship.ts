@@ -14,7 +14,7 @@ import type {
   TrackingStatusResponse,
   TrackingSubscriptionRequest,
   TrackingSubscriptionResponse,
-} from './provider.js';
+} from './provider';
 
 interface PirateShipAdapterOptions {
   apiKey?: string;
@@ -45,9 +45,10 @@ export class PirateShipAdapter implements ShippingProvider {
     this.mock = options.mock ?? !options.apiKey;
 
     const globalSymbol = Symbol.for('__pirateShipMockState__');
-    const globalObject = globalThis as typeof globalThis & {
-      __pirateShipMockState__?: Map<string, MockState>;
+    type PirateShipGlobal = typeof globalThis & {
+      [globalSymbol]?: Map<string, MockState>;
     };
+    const globalObject = globalThis as PirateShipGlobal;
 
     if (!globalObject[globalSymbol]) {
       globalObject[globalSymbol] = new Map<string, MockState>();
@@ -114,7 +115,12 @@ export class PirateShipAdapter implements ShippingProvider {
     }
 
     const payload = (await response.json()) as Record<string, unknown>;
-    const labelBase64 = String(payload.label?.data ?? payload.label ?? '');
+    const labelField = payload.label;
+    const labelData =
+      typeof labelField === 'object' && labelField !== null && 'data' in labelField
+        ? (labelField as { data?: unknown }).data
+        : labelField;
+    const labelBase64 = String(labelData ?? '');
     const labelBuffer = Buffer.from(labelBase64, 'base64');
 
     const trackingNumber = String(

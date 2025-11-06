@@ -7,7 +7,7 @@ import {
   ShipmentStatus,
   ShipmentTrackingStatus,
 } from '@prisma/client';
-import { toDecimal } from '../utils/decimal.js';
+import { toDecimal } from '../utils/decimal';
 
 export interface CreateOrderInput {
   listingId: string;

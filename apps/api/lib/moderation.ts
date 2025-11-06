@@ -1,4 +1,4 @@
-import { detectProfanity } from './profanity.js';
+import { detectProfanity } from './profanity';
 
 interface ModerationResult {
   flagged: boolean;

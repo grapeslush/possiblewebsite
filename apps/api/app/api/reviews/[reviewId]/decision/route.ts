@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ReviewStatus } from '@prisma/client';
 import { z } from 'zod';
-import { emailClient } from '../../../../../lib/email.js';
-import { auditLogs, prisma, reviews } from '../../../../../lib/services.js';
+import { emailClient } from '../../../../../lib/email';
+import { auditLogs, prisma, reviews } from '../../../../../lib/services';
 
 const decisionSchema = z.object({
   moderatorId: z.string().optional(),

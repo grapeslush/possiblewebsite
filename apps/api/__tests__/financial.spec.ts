@@ -3,7 +3,7 @@ jest.mock('@possiblewebsite/db', () => ({
   prisma: {},
 }));
 
-import { calculateFinancialBreakdown } from '../lib/stripe.js';
+import { calculateFinancialBreakdown } from '../lib/stripe';
 
 describe('financial breakdown calculations', () => {
   it('applies fee, tax, and escrow percentages', () => {

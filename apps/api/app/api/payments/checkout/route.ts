@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { createCheckoutSession } from '../../../../lib/stripe.js';
+import { createCheckoutSession } from '../../../../lib/stripe';
 
 const checkoutSchema = z.object({
   orderId: z.string(),
