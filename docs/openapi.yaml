@@ -1,0 +1,197 @@
+openapi: 3.1.0
+info:
+  title: Possible Website API
+  version: 1.0.0
+  description: |
+    REST API surface for the Possible Website marketplace. Endpoints follow JSON conventions and use bearer tokens for authentication.
+servers:
+  - url: https://api.possiblewebsite.test
+    description: Production
+  - url: http://localhost:4000
+    description: Local development
+paths:
+  /api/health:
+    get:
+      summary: Health check
+      description: Returns high-level health information used by uptime monitors.
+      responses:
+        '200':
+          description: Service healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  observedAt:
+                    type: string
+                    format: date-time
+                  checks:
+                    type: object
+                    additionalProperties:
+                      type: object
+        '503':
+          description: Degraded or failing dependencies
+  /api/readiness:
+    get:
+      summary: Readiness check
+      description: Indicates whether the API is ready to receive traffic.
+      responses:
+        '200':
+          description: Ready for traffic
+        '503':
+          description: Missing dependencies or configuration
+  /api/offers:
+    post:
+      summary: Create an offer on a listing
+      operationId: createOffer
+      tags:
+        - Offers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - listingId
+                - buyerId
+                - amount
+              properties:
+                listingId:
+                  type: string
+                buyerId:
+                  type: string
+                amount:
+                  type: number
+                message:
+                  type: string
+                expiresAt:
+                  type: string
+                  format: date-time
+      responses:
+        '201':
+          description: Offer created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Offer'
+        '400':
+          description: Validation error
+  /api/orders:
+    post:
+      summary: Create an order
+      tags:
+        - Orders
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/DirectOrderRequest'
+                - $ref: '#/components/schemas/OfferOrderRequest'
+                - $ref: '#/components/schemas/CartOrderRequest'
+      responses:
+        '201':
+          description: Order created
+  /api/reviews:
+    post:
+      summary: Submit a review
+      tags:
+        - Reviews
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewSubmission'
+      responses:
+        '201':
+          description: Review accepted
+        '202':
+          description: Review queued for moderation
+components:
+  schemas:
+    Offer:
+      type: object
+      properties:
+        id:
+          type: string
+        listingId:
+          type: string
+        buyerId:
+          type: string
+        amount:
+          type: number
+        status:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+    DirectOrderRequest:
+      type: object
+      required: [type, buyerId, sellerId, listingId, amount]
+      properties:
+        type:
+          const: direct
+        buyerId:
+          type: string
+        sellerId:
+          type: string
+        listingId:
+          type: string
+        amount:
+          type: number
+        quantity:
+          type: integer
+        shippingAddressId:
+          type: string
+        billingAddressId:
+          type: string
+        offerId:
+          type: string
+    OfferOrderRequest:
+      type: object
+      required: [type, offerId]
+      properties:
+        type:
+          const: offer
+        offerId:
+          type: string
+        shippingAddressId:
+          type: string
+        billingAddressId:
+          type: string
+    CartOrderRequest:
+      type: object
+      required: [type, buyerId]
+      properties:
+        type:
+          const: cart
+        buyerId:
+          type: string
+    ReviewSubmission:
+      type: object
+      required:
+        - orderId
+        - authorId
+        - rating
+        - body
+      properties:
+        orderId:
+          type: string
+        authorId:
+          type: string
+        targetUserId:
+          type: string
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        body:
+          type: string
+        captchaToken:
+          type: string

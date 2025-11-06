@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+
+import { instrumentRoute, incrementMetric, logger } from '../../../lib/observability';
 import { marketplace } from '../../../lib/services.js';
 import { enqueueReviewReminder } from '../../../lib/queues.js';
 
@@ -27,10 +29,13 @@ const orderSchema = z.discriminatedUnion('type', [
   }),
 ]);
 
-export async function POST(request: NextRequest) {
+export const runtime = 'nodejs';
+
+async function handlePost(request: NextRequest) {
   const payload = orderSchema.safeParse(await request.json());
 
   if (!payload.success) {
+    incrementMetric('orders.validation_error');
     return NextResponse.json({ error: payload.error.flatten() }, { status: 400 });
   }
 
@@ -61,5 +66,10 @@ export async function POST(request: NextRequest) {
 
   await enqueueReviewReminder(order.id, new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
 
+  logger.info('order created', { orderId: order.id, type: data.type });
+  incrementMetric('orders.created');
+
   return NextResponse.json(order, { status: 201 });
 }
+
+export const POST = instrumentRoute('orders', handlePost);

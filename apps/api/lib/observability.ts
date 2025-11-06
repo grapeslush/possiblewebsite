@@ -5,18 +5,24 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import { BatchSpanProcessor, ConsoleSpanExporter } from '@opentelemetry/sdk-trace-base';
 import { SpanStatusCode, trace, Tracer } from '@opentelemetry/api';
+import { NextRequest } from 'next/server';
 
 type LogContext = Record<string, unknown>;
 
+type RouteHandler<T> = (request: NextRequest, ...rest: any[]) => Promise<T> | T;
+
+type ResponseLike = { status?: number };
+
 const globalCache = globalThis as typeof globalThis & {
-  __POSSIBLE_WEB_LOGGER__?: pino.Logger;
-  __POSSIBLE_WEB_TRACER__?: Tracer;
-  __POSSIBLE_WEB_REGISTRY__?: Registry;
-  __POSSIBLE_WEB_COUNTERS__?: Map<string, Counter<string>>;
-  __POSSIBLE_WEB_OPERATION_HISTOGRAM__?: Histogram<string>;
+  __POSSIBLE_API_LOGGER__?: pino.Logger;
+  __POSSIBLE_API_TRACER__?: Tracer;
+  __POSSIBLE_API_REGISTRY__?: Registry;
+  __POSSIBLE_API_COUNTERS__?: Map<string, Counter<string>>;
+  __POSSIBLE_API_OPERATION_HISTOGRAM__?: Histogram<string>;
+  __POSSIBLE_API_HTTP_HISTOGRAM__?: Histogram<string>;
 };
 
-const serviceName = process.env.OTEL_SERVICE_NAME ?? 'possiblewebsite-web';
+const serviceName = process.env.OTEL_SERVICE_NAME ?? 'possiblewebsite-api';
 const metricsPrefix = process.env.METRICS_PREFIX ?? 'possiblewebsite';
 
 function createLogger() {
@@ -60,32 +66,32 @@ function createRegistry() {
   return register;
 }
 
-function getLoggerInstance() {
-  if (!globalCache.__POSSIBLE_WEB_LOGGER__) {
-    globalCache.__POSSIBLE_WEB_LOGGER__ = createLogger();
+function getRegistry() {
+  if (!globalCache.__POSSIBLE_API_REGISTRY__) {
+    globalCache.__POSSIBLE_API_REGISTRY__ = createRegistry();
   }
-  return globalCache.__POSSIBLE_WEB_LOGGER__;
+  return globalCache.__POSSIBLE_API_REGISTRY__;
+}
+
+function getLoggerInstance() {
+  if (!globalCache.__POSSIBLE_API_LOGGER__) {
+    globalCache.__POSSIBLE_API_LOGGER__ = createLogger();
+  }
+  return globalCache.__POSSIBLE_API_LOGGER__;
 }
 
 function getTracerInstance() {
-  if (!globalCache.__POSSIBLE_WEB_TRACER__) {
-    globalCache.__POSSIBLE_WEB_TRACER__ = createTracer();
+  if (!globalCache.__POSSIBLE_API_TRACER__) {
+    globalCache.__POSSIBLE_API_TRACER__ = createTracer();
   }
-  return globalCache.__POSSIBLE_WEB_TRACER__;
-}
-
-function getRegistry() {
-  if (!globalCache.__POSSIBLE_WEB_REGISTRY__) {
-    globalCache.__POSSIBLE_WEB_REGISTRY__ = createRegistry();
-  }
-  return globalCache.__POSSIBLE_WEB_REGISTRY__;
+  return globalCache.__POSSIBLE_API_TRACER__;
 }
 
 function getCounters() {
-  if (!globalCache.__POSSIBLE_WEB_COUNTERS__) {
-    globalCache.__POSSIBLE_WEB_COUNTERS__ = new Map();
+  if (!globalCache.__POSSIBLE_API_COUNTERS__) {
+    globalCache.__POSSIBLE_API_COUNTERS__ = new Map();
   }
-  return globalCache.__POSSIBLE_WEB_COUNTERS__;
+  return globalCache.__POSSIBLE_API_COUNTERS__;
 }
 
 function sanitizeMetricName(name: string) {
@@ -112,8 +118,8 @@ function getCounter(name: string) {
 }
 
 function getOperationHistogram() {
-  if (!globalCache.__POSSIBLE_WEB_OPERATION_HISTOGRAM__) {
-    globalCache.__POSSIBLE_WEB_OPERATION_HISTOGRAM__ = new Histogram({
+  if (!globalCache.__POSSIBLE_API_OPERATION_HISTOGRAM__) {
+    globalCache.__POSSIBLE_API_OPERATION_HISTOGRAM__ = new Histogram({
       name: `${metricsPrefix}_operation_duration_seconds`,
       help: 'Duration of internal operations in seconds',
       labelNames: ['service', 'operation', 'status'],
@@ -122,7 +128,21 @@ function getOperationHistogram() {
     });
   }
 
-  return globalCache.__POSSIBLE_WEB_OPERATION_HISTOGRAM__;
+  return globalCache.__POSSIBLE_API_OPERATION_HISTOGRAM__;
+}
+
+function getHttpHistogram() {
+  if (!globalCache.__POSSIBLE_API_HTTP_HISTOGRAM__) {
+    globalCache.__POSSIBLE_API_HTTP_HISTOGRAM__ = new Histogram({
+      name: `${metricsPrefix}_http_request_duration_seconds`,
+      help: 'HTTP request duration in seconds',
+      labelNames: ['service', 'route', 'method', 'status'],
+      buckets: [0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2, 5, 10],
+      registers: [getRegistry()],
+    });
+  }
+
+  return globalCache.__POSSIBLE_API_HTTP_HISTOGRAM__;
 }
 
 export const logger = getLoggerInstance();
@@ -132,12 +152,12 @@ export function incrementMetric(name: string, value = 1) {
   counter.inc({ service: serviceName }, value);
 }
 
-export async function getMetricsSnapshot() {
-  return getRegistry().getMetricsAsJSON();
-}
-
 export async function getPrometheusMetrics() {
   return getRegistry().metrics();
+}
+
+export async function getMetricsSnapshot() {
+  return getRegistry().getMetricsAsJSON();
 }
 
 export async function withTiming<T>(
@@ -193,5 +213,48 @@ export async function withTiming<T>(
   });
 }
 
-// Ensure the registry is initialised early to avoid hot path allocations.
+export function instrumentRoute<T extends ResponseLike>(name: string, handler: RouteHandler<T>) {
+  const histogram = getHttpHistogram();
+
+  return async (request: NextRequest, ...args: any[]) => {
+    const routeLogger = logger.child({ route: name, method: request.method });
+    const spanName = `http.${request.method.toLowerCase()}.${sanitizeMetricName(name)}`;
+
+    return withTiming(
+      spanName,
+      async () => {
+        const start = process.hrtime.bigint();
+        try {
+          const result = await handler(request, ...args);
+          const durationSeconds = Number(process.hrtime.bigint() - start) / 1_000_000_000;
+          const status = typeof result === 'object' && result?.status ? result.status : 200;
+
+          histogram.observe(
+            { service: serviceName, route: name, method: request.method, status: String(status) },
+            durationSeconds,
+          );
+          incrementMetric('http.requests.total');
+          routeLogger.info(
+            { status, durationMs: Number((durationSeconds * 1000).toFixed(2)) },
+            'request handled',
+          );
+
+          return result;
+        } catch (error) {
+          const durationSeconds = Number(process.hrtime.bigint() - start) / 1_000_000_000;
+          histogram.observe(
+            { service: serviceName, route: name, method: request.method, status: '500' },
+            durationSeconds,
+          );
+          incrementMetric('http.requests.error');
+          routeLogger.error({ err: error }, 'request failed');
+          throw error;
+        }
+      },
+      { route: name, method: request.method },
+    );
+  };
+}
+
+// prime registry on module load
 getRegistry();

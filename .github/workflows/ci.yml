@@ -9,6 +9,35 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/possiblewebsite
+      REDIS_URL: redis://localhost:6379
+      MINIO_ENDPOINT: http://localhost:9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: possiblewebsite
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout
@@ -28,8 +57,46 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate Prisma client
+        run: pnpm --filter @possiblewebsite/db run prisma:generate
+
+      - name: Run database migrations
+        run: pnpm --filter @possiblewebsite/db run prisma:migrate
+
       - name: Lint
         run: pnpm lint
 
-      - name: Test
+      - name: Unit tests
         run: pnpm test
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps
+
+      - name: Playwright end-to-end tests
+        run: pnpm --filter web test:e2e -- --trace on
+
+      - name: Build applications
+        run: pnpm build
+
+      - name: Lighthouse CI audit
+        run: pnpm exec lhci autorun --collect.startServerCommand="pnpm --filter web start -- -p 4000" --collect.startServerReadyPattern="started" --collect.url=http://localhost:4000 --upload.target=filesystem --upload.outputDir=.lighthouse
+
+      - name: Dependency audit
+        run: pnpm audit --recursive
+
+      - name: k6 smoke tests
+        env:
+          K6_TARGET_URL: http://localhost:4000/api/health
+        run: |
+          set -euo pipefail
+          pnpm --filter api build
+          pnpm --filter api start -- -p 4000 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID' EXIT
+          for attempt in {1..20}; do
+            if curl -sf $K6_TARGET_URL > /dev/null; then
+              break
+            fi
+            sleep 2
+          done
+          pnpm dlx k6@0.48.0 run tests/k6/smoke.js
