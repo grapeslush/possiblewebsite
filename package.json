@@ -16,6 +16,7 @@
     "@possiblewebsite/config": "workspace:^",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
+    "@lhci/cli": "^0.13.0",
     "@commitlint/cli": "^18.6.1",
     "@commitlint/config-conventional": "^18.6.3",
     "eslint": "^8.57.0",

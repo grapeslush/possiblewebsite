@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ReviewStatus } from '@prisma/client';
 import { z } from 'zod';
+
+import { instrumentRoute, incrementMetric, logger } from '../../../lib/observability';
 import { detectProfanity } from '../../../lib/profanity.js';
 import { evaluateReview } from '../../../lib/moderation.js';
 import { verifyCaptcha } from '../../../lib/hcaptcha.js';
@@ -16,17 +18,21 @@ const submitSchema = z.object({
   captchaToken: z.string().optional(),
 });
 
-export async function POST(request: NextRequest) {
+export const runtime = 'nodejs';
+
+async function handlePost(request: NextRequest) {
   const payload = await request.json();
   const parsed = submitSchema.safeParse(payload);
 
   if (!parsed.success) {
+    incrementMetric('reviews.validation_error');
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
   const captchaPassed = await verifyCaptcha(parsed.data.captchaToken ?? null);
 
   if (!captchaPassed) {
+    incrementMetric('reviews.captcha_failed');
     return NextResponse.json({ error: 'Captcha verification failed' }, { status: 403 });
   }
 
@@ -36,6 +42,7 @@ export async function POST(request: NextRequest) {
   });
 
   if (!allowed) {
+    incrementMetric('reviews.rate_limited');
     return NextResponse.json({ error: 'Review submission rate limit exceeded' }, { status: 429 });
   }
 
@@ -61,6 +68,9 @@ export async function POST(request: NextRequest) {
         metadata: { matches: profanity.matches },
       },
     });
+
+    logger.warn('review blocked for profanity', { matches: profanity.matches.length });
+    incrementMetric('reviews.blocked');
 
     return NextResponse.json(blockedReview, { status: 202 });
   }
@@ -114,5 +124,10 @@ export async function POST(request: NextRequest) {
     metadata: { status },
   });
 
+  logger.info('review submitted', { reviewId: review.id, status });
+  incrementMetric('reviews.submitted');
+
   return NextResponse.json(review, { status: 201 });
 }
+
+export const POST = instrumentRoute('reviews', handlePost);

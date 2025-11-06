@@ -13,5 +13,9 @@ module.exports = {
       files: ['packages/**/*.{ts,tsx,js,jsx}', '*.cjs'],
       extends: ['./packages/config/eslint/node.cjs'],
     },
+    {
+      files: ['tests/**/*.js'],
+      extends: ['./packages/config/eslint/node.cjs'],
+    },
   ],
 };
