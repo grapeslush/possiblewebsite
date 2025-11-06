@@ -7,20 +7,32 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "echo 'No tests yet'"
+    "test": "jest"
   },
   "dependencies": {
     "@possiblewebsite/config": "file:../../packages/config",
+    "@possiblewebsite/config": "workspace:^",
+    "@possiblewebsite/db": "workspace:^",
+    "bullmq": "^4.12.2",
+    "ioredis": "^5.3.2",
+    "@sendgrid/mail": "^7.7.0",
+    "postmark": "^3.0.4",
     "next": "14.1.0",
     "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "stripe": "^14.22.0",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.12",
     "@types/node": "^20.11.19",
     "@types/react": "^18.2.64",
     "@types/react-dom": "^18.2.21",
+    "jest": "^29.7.0",
     "eslint": "^8.57.0",
     "eslint-config-next": "14.1.0",
+    "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.2",
     "typescript": "^5.4.2"
   }
 }

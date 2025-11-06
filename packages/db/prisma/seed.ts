@@ -69,6 +69,19 @@ async function seedUsers() {
     )
   );
 
+  const demoSeller = await prisma.user.create({
+    data: {
+      id: '11111111-1111-1111-1111-111111111111',
+      email: 'demo-seller@example.com',
+      passwordHash: faker.string.alphanumeric(32),
+      displayName: 'Demo Marketplace Seller',
+      role: UserRole.SELLER,
+      bio: 'Curated drops for the listing creation walkthrough.',
+      phoneNumber: faker.phone.number(),
+      avatarUrl: faker.image.avatarGitHub()
+    }
+  });
+
   const buyers = await Promise.all(
     Array.from({ length: 5 }).map((_, index) =>
       prisma.user.create({
@@ -84,7 +97,7 @@ async function seedUsers() {
     )
   );
 
-  return { admin, support, sellers, buyers };
+  return { admin, support, sellers: [...sellers, demoSeller], buyers };
 }
 
 async function seedAddresses(users: { sellers: { id: string }[]; buyers: { id: string }[] }) {
@@ -127,6 +140,9 @@ async function seedListings(
   const createdOffers: string[] = [];
   const createdOrders: string[] = [];
 
+  const featureSeller =
+    sellers.find((seller) => seller.id === '11111111-1111-1111-1111-111111111111') ?? sellers[0];
+
   for (const seller of sellers) {
     for (let i = 0; i < 3; i += 1) {
       const title = faker.commerce.productName();
@@ -154,8 +170,48 @@ async function seedListings(
                 position: 1
               }
             ]
+  }
+
+  const heroListing = await prisma.listing.create({
+    data: {
+      sellerId: featureSeller?.id ?? supportAgentId,
+      title: 'Studio-grade mirrorless camera kit',
+      slug: 'studio-grade-mirrorless-camera-kit',
+      description:
+        'Meticulously maintained mirrorless camera with two lenses, premium strap, and protective case. Includes AI-crafted listing copy and optimized pricing from the demo flow.',
+      price: new Prisma.Decimal(1899.0),
+      status: ListingStatus.ACTIVE,
+      category: 'Photography',
+      tags: ['mirrorless', 'pro-kit', 'demo'],
+      publishedAt: new Date(),
+      images: {
+        create: [
+          {
+            url: 'https://images.unsplash.com/photo-1516728778615-2d590ea1856f?auto=format&fit=crop&w=800&q=80',
+            altText: 'Mirrorless camera kit',
+            position: 0,
+            isPrimary: true
+          },
+          {
+            url: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80',
+            altText: 'Camera lenses',
+            position: 1
           }
-        }
+        ]
+      }
+    }
+  });
+
+  await prisma.offer.create({
+    data: {
+      listingId: heroListing.id,
+      buyerId: buyers[0]?.id ?? sellers[0]?.id ?? supportAgentId,
+      amount: new Prisma.Decimal(1800),
+      status: OfferStatus.PENDING,
+      message: 'Would you consider $1800 with local pickup?'
+    }
+  });
+}
       });
 
       createdListings.push({ id: listing.id, sellerId: seller.id });

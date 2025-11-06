@@ -7,6 +7,8 @@ export interface CreateUserInput {
   role?: UserRole;
   bio?: string;
   phoneNumber?: string | null;
+  dateOfBirth?: Date | null;
+  marketingOptIn?: boolean;
 }
 
 export class UserRepository {
@@ -28,7 +30,10 @@ export class UserRepository {
         displayName: input.displayName,
         bio: input.bio,
         phoneNumber: input.phoneNumber ?? undefined,
-        role: input.role ?? UserRole.BUYER
+        role: input.role ?? UserRole.BUYER,
+        dateOfBirth: input.dateOfBirth ?? undefined,
+        ageVerifiedAt: input.dateOfBirth ? new Date() : undefined,
+        marketingOptIn: input.marketingOptIn ?? false
       }
     });
   }

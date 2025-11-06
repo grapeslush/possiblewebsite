@@ -19,15 +19,53 @@ export class OfferRepository {
         buyerId: input.buyerId,
         amount: toDecimal(input.amount),
         message: input.message ?? undefined,
-        expiresAt: input.expiresAt ?? undefined
-      }
+        expiresAt: input.expiresAt ?? undefined,
+      },
+    });
+  }
+
+  async counterOffer(
+    offerId: string,
+    counterAmount: number | string | Prisma.Decimal,
+    expiresAt?: Date | null,
+  ) {
+    return this.prisma.offer.update({
+      where: { id: offerId },
+      data: {
+        status: OfferStatus.COUNTERED,
+        counterAmount: toDecimal(counterAmount),
+        expiresAt: expiresAt ?? undefined,
+        respondedAt: new Date(),
+      },
     });
   }
 
   updateStatus(offerId: string, status: OfferStatus) {
     return this.prisma.offer.update({
       where: { id: offerId },
-      data: { status, respondedAt: new Date() }
+      data: { status, respondedAt: new Date() },
+    });
+  }
+
+  markExpired(offerId: string) {
+    return this.prisma.offer.update({
+      where: { id: offerId },
+      data: {
+        status: OfferStatus.EXPIRED,
+        respondedAt: new Date(),
+      },
+    });
+  }
+
+  findExpiredOffers(cutoff: Date) {
+    return this.prisma.offer.findMany({
+      where: {
+        status: OfferStatus.PENDING,
+        expiresAt: {
+          lte: cutoff,
+        },
+      },
+      select: { id: true },
     });
   }
 
@@ -36,10 +74,10 @@ export class OfferRepository {
       where: { listingId },
       include: {
         buyer: {
-          select: { id: true, displayName: true }
-        }
+          select: { id: true, displayName: true },
+        },
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
   }
 
@@ -47,9 +85,9 @@ export class OfferRepository {
     return this.prisma.offer.findFirst({
       where: {
         listingId,
-        status: { in: [OfferStatus.PENDING, OfferStatus.ACCEPTED] }
+        status: { in: [OfferStatus.PENDING, OfferStatus.ACCEPTED] },
       },
-      orderBy: { amount: 'desc' }
+      orderBy: { amount: 'desc' },
     });
   }
 
@@ -62,13 +100,13 @@ export class OfferRepository {
             id: true,
             sellerId: true,
             price: true,
-            currency: true
-          }
+            currency: true,
+          },
         },
         buyer: {
-          select: { id: true }
-        }
-      }
+          select: { id: true },
+        },
+      },
     });
   }
 }
