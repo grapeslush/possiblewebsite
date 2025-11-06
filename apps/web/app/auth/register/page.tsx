@@ -37,7 +37,7 @@ export default function RegisterPage() {
     const form = new FormData(event.currentTarget);
     const acceptPolicies = policies.map((policy) => ({
       policy: policy.policy,
-      version: policy.version
+      version: policy.version,
     }));
 
     const payload = {
@@ -46,16 +46,16 @@ export default function RegisterPage() {
       displayName: form.get('displayName'),
       dateOfBirth: form.get('dateOfBirth'),
       marketingOptIn: form.get('marketingOptIn') === 'on',
-      acceptPolicies
+      acceptPolicies,
     };
 
     const response = await fetch('/api/auth/register', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        [getCsrfHeaderName()]: csrfToken
+        [getCsrfHeaderName()]: csrfToken,
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     });
 
     if (response.ok) {
@@ -74,7 +74,12 @@ export default function RegisterPage() {
       <form className="space-y-4" onSubmit={onSubmit}>
         <div>
           <label className="block text-sm font-medium">Email</label>
-          <input className="mt-1 w-full rounded border px-3 py-2" name="email" type="email" required />
+          <input
+            className="mt-1 w-full rounded border px-3 py-2"
+            name="email"
+            type="email"
+            required
+          />
         </div>
         <div>
           <label className="block text-sm font-medium">Display name</label>
@@ -82,16 +87,31 @@ export default function RegisterPage() {
         </div>
         <div>
           <label className="block text-sm font-medium">Date of birth</label>
-          <input className="mt-1 w-full rounded border px-3 py-2" name="dateOfBirth" type="date" required />
+          <input
+            className="mt-1 w-full rounded border px-3 py-2"
+            name="dateOfBirth"
+            type="date"
+            required
+          />
         </div>
         <div>
           <label className="block text-sm font-medium">Password</label>
-          <input className="mt-1 w-full rounded border px-3 py-2" name="password" type="password" required />
+          <input
+            className="mt-1 w-full rounded border px-3 py-2"
+            name="password"
+            type="password"
+            required
+          />
         </div>
         <div className="flex items-center space-x-2">
-          <input id="marketingOptIn" name="marketingOptIn" type="checkbox" className="h-4 w-4 rounded border" />
+          <input
+            id="marketingOptIn"
+            name="marketingOptIn"
+            type="checkbox"
+            className="h-4 w-4 rounded border"
+          />
           <label htmlFor="marketingOptIn" className="text-sm">
-            Receive marketplace updates and announcements
+            Receive Tackle Exchange updates and announcements
           </label>
         </div>
         <div className="space-y-2">

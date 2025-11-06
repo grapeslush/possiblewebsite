@@ -13,7 +13,8 @@ export default async function SecurityPage() {
     <div className="mx-auto max-w-2xl py-12">
       <h1 className="text-3xl font-semibold">Security</h1>
       <p className="mt-2 text-muted-foreground">
-        Configure multi-factor authentication to protect your account.
+        Configure multi-factor authentication to protect your Tackle Exchange account and escrow
+        access.
       </p>
       <div className="mt-8 rounded border p-6">
         <SecurityForm />

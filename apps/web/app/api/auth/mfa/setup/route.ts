@@ -17,7 +17,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid CSRF token' }, { status: 403 });
   }
 
-  const { secret, otpauthUrl } = authService.generateTotpSecret(session.user.email ?? session.user.id, 'PossibleWebsite');
+  const { secret, otpauthUrl } = authService.generateTotpSecret(
+    session.user.email ?? session.user.id,
+    'TackleExchange',
+  );
 
   const device = await authService.createTotpDevice(session.user.id, secret, 'Authenticator App');
 

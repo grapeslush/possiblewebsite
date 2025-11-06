@@ -72,10 +72,10 @@ export default function SellerDashboardClient({
   return (
     <div className="space-y-10 px-6 py-12" data-testid="seller-dashboard">
       <header>
-        <h1 className="text-3xl font-semibold text-slate-900">Seller KPIs</h1>
+        <h1 className="text-3xl font-semibold text-slate-900">Tackle Exchange seller KPIs</h1>
         <p className="mt-2 max-w-2xl text-sm text-slate-600">
-          Monitor marketplace performance, upcoming payouts, and AI-powered playbooks designed to
-          maximise sell-through.
+          Monitor escrow-backed performance, upcoming payouts, and AI-powered playbooks designed to
+          keep your tackle moving between seasons.
         </p>
       </header>
 
@@ -126,14 +126,14 @@ export default function SellerDashboardClient({
                 <Line
                   type="monotone"
                   dataKey="revenue"
-                  stroke="#f60f20"
+                  stroke="#2bd4bc"
                   strokeWidth={3}
                   dot={false}
                 />
                 <Line
                   type="monotone"
                   dataKey="orders"
-                  stroke="#1b206e"
+                  stroke="#0e2733"
                   strokeWidth={2}
                   strokeDasharray="4 4"
                   dot={false}
@@ -147,9 +147,11 @@ export default function SellerDashboardClient({
           <CardHeader className="items-start">
             <div>
               <CardTitle className="flex items-center gap-2 text-base font-semibold text-slate-900">
-                <Wallet className="h-4 w-4 text-brand-primary" /> Payout summary
+                <Wallet className="h-4 w-4 text-brand-primary" /> Escrow & payout summary
               </CardTitle>
-              <CardDescription>Upcoming transfers and release cadence</CardDescription>
+              <CardDescription>
+                Upcoming transfers, escrow holds, and release cadence
+              </CardDescription>
             </div>
             <span className="text-sm font-medium text-slate-900" data-testid="payout-total">
               {numberFormatter.format(totalPayouts)} total

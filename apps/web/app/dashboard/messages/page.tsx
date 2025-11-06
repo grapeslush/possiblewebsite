@@ -54,9 +54,9 @@ export default async function MessageThreadsPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
-      <h1 className="text-3xl font-semibold text-brand-secondary">Inbox</h1>
+      <h1 className="text-3xl font-semibold text-brand-secondary">Tackle Exchange inbox</h1>
       <p className="mt-2 text-sm text-muted-foreground">
-        Manage your order and dispute conversations with real-time optimistic updates.
+        Manage escrow-protected order and dispute conversations with real-time optimistic updates.
       </p>
       <MessageCenter
         currentUserId={currentUserId}

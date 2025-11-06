@@ -29,134 +29,135 @@ export type PolicyDocument = {
 
 export const helpCategories: HelpCategory[] = [
   {
-    id: 'selling-basics',
-    title: 'Selling basics',
+    id: 'sell-your-gear',
+    title: 'Sell your tackle',
     description:
-      'Guides for onboarding new sellers, publishing listings, and fulfilling your first orders.',
+      'Guides for cleaning, photographing, and pricing rods, reels, and bundles before you publish.',
   },
   {
-    id: 'buyer-experience',
-    title: 'Buyer experience',
-    description: 'Everything shoppers need to know to checkout confidently and manage purchases.',
+    id: 'buy-with-confidence',
+    title: 'Buy with confidence',
+    description:
+      'What anglers should expect from escrow, inspections, and delivery updates on Tackle Exchange.',
   },
   {
-    id: 'trust-safety',
-    title: 'Trust & safety',
+    id: 'safety-and-escrow',
+    title: 'Safety & escrow',
     description:
-      'Learn how we protect the marketplace, handle disputes, and keep your account secure.',
+      'Understand our verification process, dispute playbooks, and how we keep trades fair.',
   },
   {
-    id: 'payouts-taxes',
-    title: 'Payouts & taxes',
+    id: 'payouts-and-compliance',
+    title: 'Payouts & compliance',
     description:
-      'Understand how money moves from buyer to seller and what information we need to stay compliant.',
+      'Everything about deposits, service fees, and the tax info required for annual reporting.',
   },
 ];
 
 export const helpArticles: HelpArticle[] = [
   {
-    slug: 'launch-your-first-listing',
-    title: 'Launch your first listing',
+    slug: 'prep-your-tackle-kit',
+    title: 'Prep your tackle kit for a fast sale',
     summary:
-      'Create a polished product page with photography, smart pricing, and fulfillment details sellers need before publishing.',
-    categoryId: 'selling-basics',
+      'Clean, stage, and document your gear so buyers know exactly what they are getting before they place an offer.',
+    categoryId: 'sell-your-gear',
     readingTime: '6 min read',
-    updatedAt: '2024-04-03',
-    body: `## 1. Capture the essentials\n\nSuccessful listings start with clear information. Gather at least five high-quality images (1200px wide or larger), a descriptive title with searchable keywords, and a bullet list of standout features. If you are migrating from another marketplace, export the SKU data to stay consistent.\n\n> Tip: The photo carousel supports background removal. Upload contrast-friendly images to let the tool work best.\n\n## 2. Set transparent pricing\n\nOpen the pricing panel to define: \n\n- *Base price* — the amount a buyer pays before taxes and shipping.\n- *Quantity* — the number of units in stock.\n- *Offer settings* — toggle \`Allow offers\` if you are open to negotiation.\n\nThe smart pricing widget suggests a range based on similar listings sold in the last 30 days. Adjust the slider until your profit margin lands within your target.\n\n## 3. Choose fulfillment and policies\n\nBuyers feel confident when shipping, returns, and warranties are spelled out. Select a default shipping profile or connect a carrier account for live rates. If you accept returns, specify the time window and who covers shipping.\n\n## 4. Preview before you publish\n\nUse the \`Preview listing\` action to experience the page like a buyer. Double-check mobile layouts, recommended accessories, and trust badges. When everything looks right, hit **Publish**. The marketplace feed updates in under a minute.`,
+    updatedAt: '2024-05-22',
+    body: `## 1. Rinse, repair, and record\n\nGive rods and reels a freshwater rinse, replace chipped guides, and spool down line that is past its prime. Snap a photo of any cosmetic blemishes—transparency keeps your seller score high.\n\n## 2. Shoot on a flat surface\n\nLay everything on a clean deck or table with neutral lighting. Include close-ups of reel seats, drag knobs, and bait hooks so buyers can zoom in. When listing bundles, group items by technique (for example, finesse spinning, offshore jigging).\n\n## 3. Publish with specifics\n\nEnter model numbers, gear ratios, and lure weight ranges so our search and compatibility tools can make smart matches. Tag your listing with lake or region intel if it has a history anglers might care about.\n\n## 4. Ship like a pro\n\nOnce the order clears escrow, pack rods in a rigid tube, lock reels, and add padding around lure boxes. Print the prepaid label from your dashboard so tracking syncs automatically.`,
   },
   {
-    slug: 'buyer-protection-program',
-    title: 'How the buyer protection program works',
+    slug: 'buyer-inspection-checklist',
+    title: 'Inspection checklist for buyers',
     summary:
-      'Understand what happens from checkout through delivery, including coverage windows and how to file a claim.',
-    categoryId: 'buyer-experience',
+      'Use this two-day window to confirm your new-to-you tackle performs as promised before releasing funds from escrow.',
+    categoryId: 'buy-with-confidence',
     readingTime: '5 min read',
-    updatedAt: '2024-03-27',
-    body: `## What is covered\n\nEvery checkout automatically includes buyer protection at no extra cost. We cover: \n\n- Items not received within the estimated delivery window.\n- Items that arrive damaged, significantly different from the description, or missing components.\n- Unauthorized transactions reported within 60 days.\n\n## How to submit a claim\n\n1. Open **Dashboard → Purchases** and locate the order.\n2. Click **Report an issue** and choose the reason.\n3. Upload supporting photos or shipping documents.\n4. Submit the claim. Our support team responds within two business days.\n\n## Resolution timeline\n\nWe immediately place the seller payout on hold. Most cases close in five to seven business days after both parties respond. If we approve the claim, we refund the buyer and help the seller arrange return shipping or relisting guidance.\n\n## Staying in good standing\n\nSellers who keep valid tracking and respond quickly rarely see disputes escalate. Buyers should message sellers before opening a claim—many shipping mishaps resolve with a quick update.`,
+    updatedAt: '2024-05-18',
+    body: `## When your shipment arrives\n\n1. Record an unboxing video before removing bubble wrap.\n2. Inspect reel handles, drag stacks, and bail arms for smooth movement.\n3. Check rod guides with a cotton swab—snags signal hidden cracks.\n4. Inventory lure trays and accessories against the listing photos.\n\n## Need to flag an issue?\n\nUse **Dashboard → Purchases → Start inspection** to upload photos and notes. We freeze the escrow clock while support reviews. Most clarifications resolve with replacement lures or a partial refund within 48 hours.\n\n## Keep your reputation sharp\n\nIf everything looks great, release escrow early to boost your buyer reliability score. Verified buyers get access to limited-drop listings and early alerts from top sellers.`,
   },
   {
-    slug: 'secure-your-account',
-    title: 'Secure your account with multi-factor authentication',
+    slug: 'escrow-protection-overview',
+    title: 'How Tackle Exchange escrow protects every trade',
     summary:
-      'Protect your login with authenticator apps, backup codes, and automated alerts that keep attackers out.',
-    categoryId: 'trust-safety',
+      'See how funds move from checkout through inspection, and why sellers love our fraud monitoring.',
+    categoryId: 'safety-and-escrow',
     readingTime: '4 min read',
-    updatedAt: '2024-02-16',
-    body: `## Turn on MFA in minutes\n\nHead to **Dashboard → Security** and click **Enable multi-factor authentication**. Scan the QR code with your preferred authenticator app (Authy, 1Password, or Google Authenticator all work). Enter the six-digit code to confirm setup.\n\n## Store your backup codes\n\nWe generate 10 one-time codes. Save them in a password manager or print and store them securely. If you lose your phone, these codes let you access your account without waiting for support.\n\n## Add login alerts\n\nToggle email and push notifications for new device logins. Each alert includes device fingerprint and approximate location. If an alert looks suspicious, revoke the session directly from the email.\n\n## Need to reset MFA?\n\nSubmit a verification request from the login screen. We will ask for identity proof (government ID and a selfie) to make sure the account owner is requesting the change.`,
+    updatedAt: '2024-05-10',
+    body: `## Step-by-step\n\n- **Checkout:** Buyers authorize payment, but we hold it in a segmented escrow wallet.\n- **Shipment:** Sellers print marketplace labels so we can verify tracking and insurance.\n- **Inspection:** Buyers get two full days after delivery scans.\n- **Release:** Funds deposit automatically unless a case is opened.\n\n## Safeguards\n\nRisk signals (duplicate photos, serial mismatches, abrupt price swings) trigger manual review by our tackle experts. Disputes route through a single thread so all context is logged for future reference.`,
   },
   {
-    slug: 'payout-schedule',
-    title: 'Understand the payout schedule',
+    slug: 'payout-timing-and-fees',
+    title: 'Payout timing, fees, and forms',
     summary:
-      'See how funds move from captured payments to your bank account and what delays a disbursement.',
-    categoryId: 'payouts-taxes',
+      'Understand when deposits hit your bank, what our 8% catch-and-release fee covers, and the tax docs we send each winter.',
+    categoryId: 'payouts-and-compliance',
     readingTime: '7 min read',
-    updatedAt: '2024-04-09',
-    body: `## Standard payout timeline\n\n| Event | Timeframe | Details |\n| --- | --- | --- |\n| Order placed | Day 0 | We authorize the buyer's card and notify you. |\n| Order fulfilled | Day 1–3 | Mark the order as shipped and provide tracking. |\n| Buyer confirms delivery | Day 3–14 | Automatic if the carrier marks the package delivered. |\n| Payout released | Day 4–15 | Funds move to your pending balance. |\n| Deposit initiated | Same day | ACH transfer starts before 6pm local time. |\n| Bank receives funds | +1 business day | Timing depends on your bank's clearing cutoffs. |\n\n## Reasons a payout might pause\n\n- First sale on a new account (one-time 7 day review).\n- Missing tax forms (W-9/W-8BEN) or identity verification.\n- A dispute opened on the order.\n- Negative account balance due to refunds or chargebacks.\n\n## Improve cash flow\n\nLink a verified bank account, enable automatic tax form reminders, and keep order defect rate below 1%. You can also request early access to Express Payouts (fee applies) once you complete 10 successful orders.`,
+    updatedAt: '2024-05-02',
+    body: `## Standard payout cadence\n\n| Event | Timeline | Details |\n| --- | --- | --- |\n| Order confirmed | Day 0 | Buyer pays into escrow. |\n| Tracking scanned | Day 1–3 | Seller ships with marketplace label. |\n| Inspection complete | Day 3–5 | Escrow releases automatically unless paused. |\n| Deposit initiated | Same day | ACH transfer begins before 7pm local time. |\n| Bank receives funds | +1 business day | Dependent on bank clearing. |\n\n## Fees explained\n\nOur 8% service fee funds payment processing, fraud reviews, and dedicated tackle specialists. Carriers charge separate shipping and insurance rates based on tube length and weight.\n\n## Tax forms\n\nWe collect W-9 or W-8BEN details during onboarding. Once you cross IRS thresholds, 1099-K forms post in **Dashboard → Documents** each January.`,
   },
   {
-    slug: 'resolving-order-disputes',
-    title: 'Resolving order disputes collaboratively',
+    slug: 'resolving-gear-disputes',
+    title: 'Resolve gear disputes without breaking trust',
     summary:
-      'Walk through the joint buyer-seller workflow for resolving issues before support has to step in.',
-    categoryId: 'trust-safety',
+      'Follow this playbook when an item arrives damaged or missing parts so we can get both anglers back on the water.',
+    categoryId: 'safety-and-escrow',
     readingTime: '5 min read',
-    updatedAt: '2024-03-05',
-    body: `## Start with a conversation\n\nOpen the order in **Dashboard → Messages** and choose a pre-built prompt such as *\"Package delayed\"* or *\"Incorrect item sent\"*. This gives both parties a shared thread and timeline.\n\n## Share proof quickly\n\nUpload photos, receipts, or carrier correspondence directly to the thread. Both sides can react to updates, so it is clear when a message has been read.\n\n## Agree on a path forward\n\nUse the **Resolve issue** button to choose between refund, replacement, or store credit. The platform records the decision, schedules return shipping if needed, and updates payouts automatically.\n\nIf the conversation stalls for more than 48 hours, escalate to support. We review the thread, apply marketplace policies, and close the case within two business days.`,
+    updatedAt: '2024-05-12',
+    body: `## Start with context\n\nOpen the order thread and choose a prompt like *"Guide wraps cracked"* or *"Electronics DOA"*. Upload proof, including the unboxing video.\n\n## Pick a resolution\n\nUse **Resolve issue** to select refund, replacement, or repair credit. Our system auto-calculates shipping labels for returns or exchanges.\n\n## When we step in\n\nIf messages stall for more than 48 hours, escalate to Tackle Exchange support. We review footage, serial numbers, and inspection logs before issuing a decision that protects escrow for the right party.`,
   },
 ];
 
 export const faqs: FaqEntry[] = [
   {
-    question: 'How do I verify my identity as a seller?',
+    question: 'How do I become a verified tackle seller?',
     answer:
-      'Head to **Dashboard → Settings → Identity**. Upload a government-issued ID and a selfie. Verification typically completes within 10 minutes during business hours.',
+      'Complete **Dashboard → Settings → Verification** with a government ID, a recent utility bill, and at least one listing video walk-through. Our tackle specialists approve most submissions within one business day.',
   },
   {
-    question: 'Can I connect an existing Shopify or Etsy catalog?',
+    question: 'What shipping supplies do you recommend for rods?',
     answer:
-      'Yes. Use the catalog importer located in **Dashboard → Integrations**. We map core fields automatically and flag anything that needs manual review before publishing.',
+      'Use a rigid rod tube or PVC pipe with foam inserts at both ends. We partner with carriers that honor our damage waiver when you print the prepaid label from Tackle Exchange.',
   },
   {
-    question: 'What payment methods do buyers see at checkout?',
+    question: 'Which payment methods work with escrow?',
     answer:
-      'We support major credit and debit cards, Apple Pay, Google Pay, and installment plans through Possible Pay Later in eligible regions.',
+      'We accept major cards, Apple Pay, Google Pay, and Tackle Exchange Gift Credits. All options route funds into the same escrow ledger until inspections finish.',
   },
   {
-    question: 'Do you charge listing fees?',
+    question: 'What is the service fee for sellers?',
     answer:
-      'No listing fees. We collect a 7% marketplace service fee when an order completes. Payment processing fees vary by region and payment method.',
+      'Sellers pay an 8% catch-and-release fee on completed orders. There are no listing fees or penalties for price edits before you accept an offer.',
   },
   {
-    question: 'How are taxes calculated?',
+    question: 'How does sales tax work?',
     answer:
-      'Possible Website automatically calculates sales tax based on ship-to address and your nexus settings. Sellers can review tax breakdowns per order in the analytics dashboard.',
+      'Tackle Exchange calculates destination-based sales tax automatically using your nexus profile. You can download transaction-level tax summaries anytime from the analytics dashboard.',
   },
 ];
 
 export const policies: PolicyDocument[] = [
   {
-    slug: 'terms-of-service',
-    title: 'Terms of Service',
+    slug: 'terms-of-trade',
+    title: 'Terms of Trade',
     summary:
-      'Defines your contractual relationship with Possible Website, including acceptable use and account responsibilities.',
-    lastUpdated: '2024-04-01',
-    body: `## 1. Agreement to terms\n\nBy creating an account or using Possible Website you agree to these Terms, our Privacy Notice, and any product-specific guidelines. If you act on behalf of a company, you represent that you have authority to bind it.\n\n## 2. Marketplace eligibility\n\nTo sell on Possible Website you must:\n\n1. Be at least 18 years old or the age of majority in your jurisdiction.\n2. Provide accurate identity, tax, and payout information.\n3. Keep your account in good standing with an order defect rate below 2%.\n\nWe may suspend or terminate accounts that violate policies, engage in fraudulent activity, or present safety risks.\n\n## 3. Fees and payments\n\nWe charge service and payment processing fees as posted in your seller dashboard. By processing transactions through Possible Website you authorize us to debit and credit your connected bank accounts as required to settle balances, refunds, or chargebacks.\n\n## 4. Content and licensing\n\nYou retain ownership of content you upload but grant Possible Website a worldwide, royalty-free license to host, display, and promote your listings. You are responsible for ensuring you have rights to any media you submit.\n\n## 5. Limitation of liability\n\nPossible Website is not liable for indirect, incidental, or consequential damages. Our aggregate liability under these Terms will not exceed the total fees you paid in the three months preceding the claim.`,
+      'Defines your relationship with Tackle Exchange, including acceptable listings, escrow rules, and account expectations.',
+    lastUpdated: '2024-05-01',
+    body: `## 1. Agreement to terms\n\nBy creating a Tackle Exchange account you agree to these Terms, our Privacy Policy, and any listing-specific guidelines. If you register on behalf of a guide service or shop, you confirm you have authority to bind that business.\n\n## 2. Marketplace eligibility\n\nTo sell on Tackle Exchange you must be at least 18, maintain accurate identity, tax, and payout info, and keep your order defect rate below 2%. We may pause or terminate accounts that post counterfeit gear, fail to ship, or otherwise endanger community trust.\n\n## 3. Fees and payments\n\nYou authorize us to debit and credit your connected bank account for escrow releases, refunds, and chargebacks. Service fees are disclosed before you accept an offer.\n\n## 4. Content rights\n\nYou retain ownership of the photos, videos, and descriptions you upload. You grant Tackle Exchange a worldwide, royalty-free license to host and promote that content for marketplace operations.\n\n## 5. Liability\n\nWe are not liable for indirect or consequential damages arising from trades. Our total liability under these Terms will not exceed the fees you paid in the three months preceding a claim.`,
   },
   {
-    slug: 'privacy-notice',
-    title: 'Privacy Notice',
+    slug: 'privacy-policy',
+    title: 'Privacy Policy',
     summary:
-      'Explains what data we collect, why we collect it, and the controls you have over your personal information.',
-    lastUpdated: '2024-03-20',
-    body: `## Data we collect\n\n- Account details such as name, email, phone number, and profile imagery.\n- Transaction records including orders, payouts, refunds, and dispute history.\n- Usage analytics like device identifiers, IP addresses, and session events.\n- Communications with buyers and support.\n\n## How we use your data\n\nWe process data to operate the marketplace, fulfill legal obligations, detect fraud, personalize experiences, and communicate product updates. When legally required, we obtain consent before using personal data for marketing.\n\n## Sharing and retention\n\nWe share data with payment processors, shipping partners, identity verification providers, and analytics vendors who help us run the platform. We retain data as long as your account is active or as needed to meet legal requirements.\n\n## Your choices\n\nYou can download an account archive, request deletion, or opt out of marketing emails at any time from **Dashboard → Privacy**. Certain financial records must remain for regulatory compliance.`,
+      'Explains the data we collect to operate the marketplace, fight fraud, and personalize the tackle experience.',
+    lastUpdated: '2024-04-28',
+    body: `## Data we collect\n\n- Account details such as name, email, phone, and preferred fisheries.\n- Transaction records including listings, offers, shipments, disputes, and payout history.\n- Device and usage analytics like IP addresses, session logs, and error reports.\n- Support conversations and inspection media.\n\n## How we use data\n\nWe process information to power listing discovery, manage escrow, comply with legal obligations, and surface relevant tackle recommendations. Marketing messages require your consent, which you can withdraw anytime.\n\n## Sharing and retention\n\nWe share data with payment processors, shipping carriers, identity verification partners, and analytics vendors under strict contracts. We retain data while your account remains active and as needed for legal and tax requirements.\n\n## Your choices\n\nDownload account archives, request deletion, and manage marketing preferences via **Dashboard → Privacy**. Some financial records must remain for compliance even after deletion.`,
   },
   {
-    slug: 'seller-code-of-conduct',
+    slug: 'seller-code',
     title: 'Seller Code of Conduct',
     summary:
-      'Outlines the professional standards every seller must follow to maintain a trusted marketplace.',
-    lastUpdated: '2024-02-11',
-    body: `## Keep promises to buyers\n\nShip orders by the handling time you set, provide valid tracking, and respond to messages within one business day.\n\n## List accurately\n\nDescribe items honestly, disclose condition issues, and use your own photography whenever possible. Counterfeit or unsafe goods are strictly prohibited.\n\n## Communicate respectfully\n\nHarassment, hate speech, or retaliatory feedback manipulation results in immediate suspension. Keep all order-related conversations on-platform so we can assist if problems arise.\n\n## Cooperate with investigations\n\nWhen support needs documentation, respond promptly. Provide receipts, photos, or serial numbers within the requested window to keep cases moving.\n\n## Mind compliance obligations\n\nMaintain up-to-date tax information and comply with regional regulations for restricted product categories (for example, electronics or cosmetics).`,
+      'Sets expectations for honest listings, safe packaging, and respectful communication between anglers.',
+    lastUpdated: '2024-04-15',
+    body: `## Ship on time\n\nConfirm orders within 24 hours, use approved carriers, and upload tracking so buyers can follow their gear home.\n\n## Describe accurately\n\nDisclose repairs, aftermarket mods, or rust spots. Photos must be your own and represent the actual item in hand.\n\n## Communicate with respect\n\nKeep all trade messages inside Tackle Exchange so we can help if problems arise. Harassment, hate speech, or retaliation through reviews is prohibited.\n\n## Cooperate with reviews\n\nIf support requests documentation (receipts, serial numbers, videos) respond within two business days. Delay may result in refunds from your pending balance.\n\n## Follow local regulations\n\nStay compliant with state and federal rules governing knives, electronics, or other regulated tackle categories.`,
   },
 ];

@@ -19,15 +19,10 @@ interface PricingSummary {
   rationale?: string;
 }
 
-const demoSellerId = process.env.NEXT_PUBLIC_DEMO_SELLER_ID ?? '11111111-1111-1111-1111-111111111111';
+const demoSellerId =
+  process.env.NEXT_PUBLIC_DEMO_SELLER_ID ?? '11111111-1111-1111-1111-111111111111';
 
-const steps = [
-  'Upload photo',
-  'AI description',
-  'Price guidance',
-  'Preview',
-  'Publish'
-];
+const steps = ['Upload photo', 'AI description', 'Price guidance', 'Preview', 'Publish'];
 
 export default function ListingWizardPage() {
   const [stepIndex, setStepIndex] = useState(0);
@@ -46,7 +41,7 @@ export default function ListingWizardPage() {
     category: '',
     tags: [] as string[],
     price: '',
-    currency: 'USD'
+    currency: 'USD',
   });
 
   const progress = useMemo(() => ((stepIndex + 1) / steps.length) * 100, [stepIndex]);
@@ -74,7 +69,7 @@ export default function ListingWizardPage() {
 
       const response = await fetch('/api/ai/upload', {
         method: 'POST',
-        body
+        body,
       });
 
       if (!response.ok) {
@@ -103,7 +98,10 @@ export default function ListingWizardPage() {
       const response = await fetch('/api/ai/vision', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageUrl, prompt: `Describe ${form.title || 'this item'} for a marketplace listing.` })
+        body: JSON.stringify({
+          imageUrl,
+          prompt: `Describe ${form.title || 'this item'} for a Tackle Exchange listing.`,
+        }),
       });
 
       if (!response.ok) {
@@ -116,7 +114,7 @@ export default function ListingWizardPage() {
         ...current,
         description: payload.description ?? current.description,
         tags: payload.tags?.slice(0, 8) ?? current.tags,
-        title: current.title || buildTitleFromTags(payload.tags)
+        title: current.title || buildTitleFromTags(payload.tags),
       }));
       setStepIndex(2);
     } catch (visionError) {
@@ -149,7 +147,7 @@ export default function ListingWizardPage() {
       setPricing(payload);
       setForm((current) => ({
         ...current,
-        price: current.price || String(payload.averagePrice ?? '')
+        price: current.price || String(payload.averagePrice ?? ''),
       }));
       setStepIndex(3);
     } catch (pricingError) {
@@ -184,10 +182,10 @@ export default function ListingWizardPage() {
             {
               url: imageUrl,
               altText: form.title,
-              isPrimary: true
-            }
-          ]
-        })
+              isPrimary: true,
+            },
+          ],
+        }),
       });
 
       if (!response.ok) {
@@ -210,7 +208,8 @@ export default function ListingWizardPage() {
         <p className="text-xs uppercase tracking-[0.3em] text-brand-secondary">New listing</p>
         <h1 className="text-3xl font-semibold">Guided listing creation</h1>
         <p className="text-sm text-muted-foreground">
-          Upload a product photo, let AI draft the story, review pricing guidance, and launch with confidence.
+          Upload a product photo, let AI draft the story, review pricing guidance, and launch with
+          confidence.
         </p>
       </header>
 
@@ -226,8 +225,8 @@ export default function ListingWizardPage() {
               index === stepIndex
                 ? 'bg-brand-primary text-white'
                 : index < stepIndex
-                ? 'bg-brand-secondary/10 text-brand-secondary'
-                : 'bg-muted text-muted-foreground'
+                  ? 'bg-brand-secondary/10 text-brand-secondary'
+                  : 'bg-muted text-muted-foreground'
             }`}
           >
             {label}
@@ -236,11 +235,16 @@ export default function ListingWizardPage() {
       </nav>
 
       {error ? (
-        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
+        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
       ) : null}
 
       {stepIndex === 0 ? (
-        <form onSubmit={handleUpload} className="space-y-4 rounded-lg border border-dashed border-brand-secondary/40 bg-white p-6 shadow-sm">
+        <form
+          onSubmit={handleUpload}
+          className="space-y-4 rounded-lg border border-dashed border-brand-secondary/40 bg-white p-6 shadow-sm"
+        >
           <h2 className="text-xl font-semibold">1. Upload product photography</h2>
           <p className="text-sm text-muted-foreground">
             High-quality images help buyers trust your listing. JPEG or PNG recommended.
@@ -267,7 +271,8 @@ export default function ListingWizardPage() {
           <div className="space-y-4">
             <h2 className="text-xl font-semibold">2. Generate story with AI vision</h2>
             <p className="text-sm text-muted-foreground">
-              We send the uploaded photo to OpenAI (or fall back to our local model) to suggest a description and tags.
+              We send the uploaded photo to OpenAI (or fall back to our local model) to suggest a
+              description and tags.
             </p>
             <Button onClick={handleVision} disabled={loading} data-testid="vision-generate">
               {loading ? 'Analysing…' : 'Generate description'}
@@ -275,10 +280,15 @@ export default function ListingWizardPage() {
             {vision ? (
               <div className="rounded-md border border-brand-secondary/30 bg-brand-secondary/5 p-4 text-sm">
                 <p className="font-medium text-brand-secondary">Suggested description</p>
-                <p className="mt-2 whitespace-pre-line text-muted-foreground">{vision.description}</p>
+                <p className="mt-2 whitespace-pre-line text-muted-foreground">
+                  {vision.description}
+                </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {vision.tags?.map((tag) => (
-                    <span key={tag} className="rounded-full bg-brand-primary/10 px-2 py-1 text-xs text-brand-primary">
+                    <span
+                      key={tag}
+                      className="rounded-full bg-brand-primary/10 px-2 py-1 text-xs text-brand-primary"
+                    >
                       {tag}
                     </span>
                   ))}
@@ -288,7 +298,11 @@ export default function ListingWizardPage() {
           </div>
           <div className="flex items-center justify-center rounded-md border border-brand-secondary/30 bg-muted/40 p-4">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={imageUrl} alt="Uploaded preview" className="max-h-80 rounded-md object-cover" />
+            <img
+              src={imageUrl}
+              alt="Uploaded preview"
+              className="max-h-80 rounded-md object-cover"
+            />
           </div>
           <div className="md:col-span-2 flex justify-end">
             <Button onClick={() => setStepIndex(2)} variant="outline" disabled={!vision || loading}>
@@ -306,7 +320,9 @@ export default function ListingWizardPage() {
               Listing title
               <input
                 value={form.title}
-                onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, title: event.target.value }))
+                }
                 className="rounded-md border border-brand-secondary/30 px-3 py-2"
                 placeholder="Vintage camera, handmade decor…"
               />
@@ -315,7 +331,9 @@ export default function ListingWizardPage() {
               Category
               <input
                 value={form.category}
-                onChange={(event) => setForm((current) => ({ ...current, category: event.target.value }))}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, category: event.target.value }))
+                }
                 className="rounded-md border border-brand-secondary/30 px-3 py-2"
                 placeholder="Photography, Collectibles, Apparel"
               />
@@ -331,9 +349,12 @@ export default function ListingWizardPage() {
                 {pricing.currency} {pricing.averagePrice.toFixed(2)}
               </p>
               <p className="text-xs text-muted-foreground">
-                Range {pricing.currency} {pricing.minPrice.toFixed(2)} – {pricing.currency} {pricing.maxPrice.toFixed(2)}
+                Range {pricing.currency} {pricing.minPrice.toFixed(2)} – {pricing.currency}{' '}
+                {pricing.maxPrice.toFixed(2)}
               </p>
-              {pricing.rationale ? <p className="mt-2 text-xs text-muted-foreground">{pricing.rationale}</p> : null}
+              {pricing.rationale ? (
+                <p className="mt-2 text-xs text-muted-foreground">{pricing.rationale}</p>
+              ) : null}
             </div>
           ) : null}
           <div className="flex justify-end">
@@ -359,7 +380,9 @@ export default function ListingWizardPage() {
               Title
               <input
                 value={form.title}
-                onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, title: event.target.value }))
+                }
                 className="rounded-md border border-brand-secondary/30 px-3 py-2"
               />
             </label>
@@ -367,7 +390,9 @@ export default function ListingWizardPage() {
               Price ({form.currency})
               <input
                 value={form.price}
-                onChange={(event) => setForm((current) => ({ ...current, price: event.target.value }))}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, price: event.target.value }))
+                }
                 className="rounded-md border border-brand-secondary/30 px-3 py-2"
                 type="number"
                 step="0.01"
@@ -378,7 +403,9 @@ export default function ListingWizardPage() {
             Description
             <textarea
               value={form.description}
-              onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, description: event.target.value }))
+              }
               rows={5}
               className="rounded-md border border-brand-secondary/30 px-3 py-2"
             />
@@ -393,24 +420,28 @@ export default function ListingWizardPage() {
                   tags: event.target.value
                     .split(',')
                     .map((tag) => tag.trim())
-                    .filter(Boolean)
+                    .filter(Boolean),
                 }))
               }
               className="rounded-md border border-brand-secondary/30 px-3 py-2"
-              placeholder="vintage, analog, collectible"
+              placeholder="swimbait, bass, 7ft-medium"
             />
           </label>
           {imageUrl ? (
             <div className="flex justify-center">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={imageUrl} alt={form.title} className="max-h-72 rounded-md border object-cover" />
+              <img
+                src={imageUrl}
+                alt={form.title}
+                className="max-h-72 rounded-md border object-cover"
+              />
             </div>
           ) : null}
           {stepIndex === 4 && publishedSlug ? (
             <div className="rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-700">
               Listing published! View it on the{' '}
               <a href={`/listing/${publishedSlug}`} className="font-medium underline">
-                marketplace page
+                Tackle Exchange page
               </a>
               .
             </div>
@@ -425,7 +456,10 @@ export default function ListingWizardPage() {
                   {loading ? 'Publishing…' : 'Publish listing'}
                 </Button>
               ) : (
-                <Button variant="outline" onClick={() => window.location.assign(`/listing/${publishedSlug}`)}>
+                <Button
+                  variant="outline"
+                  onClick={() => window.location.assign(`/listing/${publishedSlug}`)}
+                >
                   View listing
                 </Button>
               )}

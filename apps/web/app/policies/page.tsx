@@ -7,7 +7,7 @@ import { policies } from '@/data/knowledge-base';
 export const metadata: Metadata = {
   title: 'Policies',
   description:
-    'Key marketplace policies covering terms of service, privacy practices, and seller responsibilities.',
+    'Key Tackle Exchange policies covering terms of service, privacy practices, and seller responsibilities.',
 };
 
 export default function PoliciesPage() {
@@ -16,7 +16,8 @@ export default function PoliciesPage() {
       <header className="text-center">
         <h1 className="text-4xl font-bold text-neutral-900">Marketplace policies</h1>
         <p className="mt-3 text-lg text-neutral-600">
-          These documents spell out what we expect from every buyer and seller on Possible Website.
+          These documents outline how Tackle Exchange keeps trades fair—from acceptable listings to
+          privacy standards and seller responsibilities.
         </p>
       </header>
 

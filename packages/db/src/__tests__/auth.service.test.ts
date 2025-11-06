@@ -8,24 +8,24 @@ const buildPrisma = () => {
     verificationToken: {
       create: jest.fn(),
       findUnique: jest.fn(),
-      delete: jest.fn()
+      delete: jest.fn(),
     },
     user: {
       findUnique: jest.fn(),
-      update: jest.fn()
+      update: jest.fn(),
     },
     policyAcceptance: {
-      create: jest.fn()
+      create: jest.fn(),
     },
     totpDevice: {
       create: jest.fn(),
-      update: jest.fn()
+      update: jest.fn(),
     },
-    $transaction: jest.fn(async (operations: any[]) => {
+    $transaction: jest.fn(async (operations: readonly Promise<unknown>[]) => {
       for (const operation of operations) {
         await operation;
       }
-    })
+    }),
   };
 
   return prisma as unknown as PrismaClient;
@@ -44,15 +44,18 @@ describe('AuthService', () => {
   it('creates an email verification token', async () => {
     const prisma = buildPrisma();
     const service = new AuthService(prisma);
-    const user = { id: faker.string.uuid(), email: faker.internet.email() } as Pick<User, 'id' | 'email'>;
+    const user = { id: faker.string.uuid(), email: faker.internet.email() } as Pick<
+      User,
+      'id' | 'email'
+    >;
 
     const result = await service.createEmailVerificationToken(user);
 
     expect(result.token).toHaveLength(64);
     expect(prisma.verificationToken.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({ identifier: user.email })
-      })
+        data: expect.objectContaining({ identifier: user.email }),
+      }),
     );
   });
 
@@ -64,12 +67,12 @@ describe('AuthService', () => {
     const record = {
       identifier: user.email,
       token,
-      expires: new Date(Date.now() + 1000)
+      expires: new Date(Date.now() + 1000),
     };
 
     prisma.verificationToken.findUnique = jest.fn().mockResolvedValue(record);
     prisma.user.findUnique = jest.fn().mockResolvedValue(user);
-    prisma.$transaction = jest.fn(async (operations: any[]) => {
+    prisma.$transaction = jest.fn(async (operations: readonly Promise<unknown>[]) => {
       await operations[0];
       await operations[1];
     });
@@ -79,8 +82,8 @@ describe('AuthService', () => {
     expect(userId).toBe(user.id);
     expect(prisma.user.update).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({ emailVerified: expect.any(Date) })
-      })
+        data: expect.objectContaining({ emailVerified: expect.any(Date) }),
+      }),
     );
   });
 
@@ -92,7 +95,7 @@ describe('AuthService', () => {
         policy: 'terms',
         version: '2024-01-01',
         acceptedAt: new Date(),
-        ipAddress: null
+        ipAddress: null,
       },
       {
         id: faker.string.uuid(),
@@ -100,8 +103,8 @@ describe('AuthService', () => {
         policy: 'privacy',
         version: '2024-01-01',
         acceptedAt: new Date(),
-        ipAddress: null
-      }
+        ipAddress: null,
+      },
     ];
 
     const prisma = buildPrisma();
@@ -114,7 +117,7 @@ describe('AuthService', () => {
   it('generates and validates totp codes', async () => {
     const prisma = buildPrisma();
     const service = new AuthService(prisma);
-    const { secret } = service.generateTotpSecret('user@example.com', 'PossibleWebsite');
+    const { secret } = service.generateTotpSecret('user@example.com', 'TackleExchange');
     const device: TotpDevice = {
       id: faker.string.uuid(),
       userId: faker.string.uuid(),
@@ -122,7 +125,7 @@ describe('AuthService', () => {
       label: null,
       verifiedAt: null,
       lastUsedAt: null,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
     prisma.totpDevice.update = jest.fn().mockResolvedValue(device);

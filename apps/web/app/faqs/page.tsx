@@ -6,7 +6,7 @@ import { faqs } from '@/data/knowledge-base';
 export const metadata: Metadata = {
   title: 'Frequently Asked Questions',
   description:
-    'Quick answers to the most common questions about buying, selling, and getting paid on Possible Website.',
+    'Quick answers to the most common questions about buying, selling, and getting paid on Tackle Exchange.',
 };
 
 export default function FaqPage() {
@@ -15,8 +15,8 @@ export default function FaqPage() {
       <header className="text-center">
         <h1 className="text-4xl font-bold text-neutral-900">Frequently asked questions</h1>
         <p className="mt-3 text-lg text-neutral-600">
-          If you need step-by-step guidance, explore the help center articles or contact support
-          anytime.
+          If you need step-by-step guidance tailored to anglers, explore the help center articles or
+          contact the Tackle Exchange support crew anytime.
         </p>
       </header>
 

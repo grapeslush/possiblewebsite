@@ -23,7 +23,8 @@ export default async function ReviewsPage() {
     <div className="mx-auto max-w-3xl px-6 py-10">
       <h1 className="text-3xl font-semibold text-brand-secondary">Share your experience</h1>
       <p className="mt-2 text-sm text-muted-foreground">
-        Reviews are screened by automated and human moderation before appearing publicly.
+        Reviews feed into Tackle Exchange trust scores and are screened by automated and human
+        moderation before appearing publicly.
       </p>
       <ReviewForm
         currentUserId={currentUserId}

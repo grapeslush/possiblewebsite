@@ -16,21 +16,21 @@ export async function generateMetadata({ searchParams }: SearchPageProps): Promi
   const term = extractParam(searchParams.q);
   const category = extractParam(searchParams.category);
 
-  const title = term ? `Search results for "${term}"` : 'Explore the marketplace';
+  const title = term ? `Search results for "${term}"` : 'Explore Tackle Exchange listings';
   const description = category
-    ? `Curated marketplace listings in ${category}. Discover new and vintage finds backed by AI-assisted content.`
-    : 'Discover curated listings with AI-enhanced descriptions, pricing insights, and verified sellers.';
+    ? `Curated Tackle Exchange listings in ${category}. Discover new and vintage gear backed by AI-assisted content.`
+    : 'Discover verified gear with AI-enhanced descriptions, seasonal pricing insights, and escrow protection.';
 
   return {
     title,
     description,
     openGraph: {
       title,
-      description
+      description,
     },
     alternates: {
-      canonical: term ? `/search?q=${encodeURIComponent(term)}` : '/search'
-    }
+      canonical: term ? `/search?q=${encodeURIComponent(term)}` : '/search',
+    },
   };
 }
 
@@ -45,17 +45,17 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     category,
     minPrice: minPrice ?? undefined,
     maxPrice: maxPrice ?? undefined,
-    limit: 30
+    limit: 30,
   });
 
   const categories = await prisma.listing.findMany({
     where: {
       status: ListingStatus.ACTIVE,
-      category: { not: null }
+      category: { not: null },
     },
     distinct: ['category'],
     select: { category: true },
-    orderBy: { category: 'asc' }
+    orderBy: { category: 'asc' },
   });
 
   const jsonLd = buildJsonLd(listings, term);
@@ -63,28 +63,39 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-8 px-6 py-10">
       <header className="space-y-3">
-        <p className="text-xs uppercase tracking-[0.3em] text-brand-secondary">Marketplace</p>
-        <h1 className="text-3xl font-semibold">{term ? `Results for “${term}”` : 'Search listings'}</h1>
+        <p className="text-xs uppercase tracking-[0.3em] text-brand-secondary">
+          Tackle Exchange marketplace
+        </p>
+        <h1 className="text-3xl font-semibold">
+          {term ? `Results for “${term}”` : 'Search tackle listings'}
+        </h1>
         <p className="max-w-2xl text-sm text-muted-foreground">
-          We use PostgreSQL trigram search to surface fuzzy matches, and overlay AI-powered pricing guidance to highlight
-          high-confidence deals.
+          We use PostgreSQL trigram search to surface fuzzy matches, and overlay AI-powered pricing
+          guidance to highlight high-confidence deals.
         </p>
       </header>
 
-      <form className="grid gap-4 rounded-lg border bg-white p-6 shadow-sm md:grid-cols-[2fr_1fr_1fr_1fr]" method="get">
+      <form
+        className="grid gap-4 rounded-lg border bg-white p-6 shadow-sm md:grid-cols-[2fr_1fr_1fr_1fr]"
+        method="get"
+      >
         <label className="flex flex-col gap-1 text-sm">
           Search term
           <input
             className="rounded-md border border-brand-secondary/30 px-3 py-2"
             name="q"
             defaultValue={term ?? ''}
-            placeholder="Vintage camera, artisan candle…"
+            placeholder="Custom jigging rod, sonar bundle…"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
           Category
-          <select name="category" defaultValue={category ?? ''} className="rounded-md border border-brand-secondary/30 px-3 py-2">
-            <option value="">All categories</option>
+          <select
+            name="category"
+            defaultValue={category ?? ''}
+            className="rounded-md border border-brand-secondary/30 px-3 py-2"
+          >
+            <option value="">All tackle categories</option>
             {categories
               .map((entry) => entry.category)
               .filter((value): value is string => Boolean(value))
@@ -126,11 +137,14 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       <section className="grid gap-6 md:grid-cols-3">
         {listings.length === 0 ? (
           <div className="col-span-full rounded-md border border-dashed border-brand-secondary/30 bg-muted/20 p-6 text-center text-sm text-muted-foreground">
-            No listings matched your query. Try adjusting filters or exploring a different category.
+            No tackle matched your query. Try adjusting filters or exploring a different category.
           </div>
         ) : (
           listings.map((listing) => (
-            <article key={listing.id} className="space-y-3 rounded-lg border bg-white p-4 shadow-sm">
+            <article
+              key={listing.id}
+              className="space-y-3 rounded-lg border bg-white p-4 shadow-sm"
+            >
               <Link href={`/listing/${listing.slug}`} className="group flex flex-col gap-3">
                 {listing.images?.[0] ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -157,7 +171,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         )}
       </section>
 
-      <script type="application/ld+json" suppressHydrationWarning>{JSON.stringify(jsonLd)}</script>
+      <script type="application/ld+json" suppressHydrationWarning>
+        {JSON.stringify(jsonLd)}
+      </script>
     </div>
   );
 }
@@ -192,8 +208,8 @@ function buildJsonLd(listings: any[], searchTerm: string | null) {
       offers: {
         '@type': 'Offer',
         priceCurrency: listing.currency,
-        price: Number(listing.price)
-      }
-    }))
+        price: Number(listing.price),
+      },
+    })),
   };
 }
