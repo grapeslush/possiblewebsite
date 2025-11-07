@@ -11,13 +11,27 @@ import {
   Prisma,
   PrismaClient,
   ShipmentStatus,
-  UserRole
+  TackleCategory,
+  TackleCondition,
+  UserRole,
+  WaterType,
 } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 
 const prisma = new PrismaClient();
 
+const TACKLE_BRANDS = ['Megabass', 'Shimano', 'Daiwa', 'G. Loomis', 'Dobyns', 'St. Croix'];
+const LURE_STYLES = ['Swimbait', 'Frog', 'Football Jig', 'Bladed Jig', 'Jerkbait', 'Crankbait'];
+const TECHNIQUES = ['Flipping', 'Pitching', 'Finesse', 'Power Fishing', 'Dock Skipping', 'Offshore Structure'];
+const SEASONS = ['Spring', 'Summer', 'Fall', 'Winter'];
+
 async function clearDatabase() {
+  await prisma.message.deleteMany();
+  await prisma.threadParticipant.deleteMany();
+  await prisma.thread.deleteMany();
+  await prisma.recommendationCache.deleteMany();
+  await prisma.helpArticle.deleteMany();
+  await prisma.policyAcceptance.deleteMany();
   await prisma.auditLog.deleteMany();
   await prisma.notification.deleteMany();
   await prisma.disputeMessage.deleteMany();
@@ -29,6 +43,8 @@ async function clearDatabase() {
   await prisma.offer.deleteMany();
   await prisma.listingImage.deleteMany();
   await prisma.listing.deleteMany();
+  await prisma.shippingProfile.deleteMany();
+  await prisma.policy.deleteMany();
   await prisma.address.deleteMany();
   await prisma.user.deleteMany();
 }
@@ -125,6 +141,36 @@ async function seedAddresses(users: { sellers: { id: string }[]; buyers: { id: s
   return addressByUser;
 }
 
+async function seedShippingProfiles(sellers: { id: string; displayName: string }[]) {
+  const profiles = await Promise.all(
+    sellers.map((seller) =>
+      prisma.shippingProfile.create({
+        data: {
+          sellerId: seller.id,
+          label: `${seller.displayName.split(' ')[0] ?? 'Seller'} tackle shipping`,
+          courierPreference: faker.helpers.arrayElement(['USPS', 'UPS', 'FedEx']),
+          serviceLevel: faker.helpers.arrayElement(['Priority', 'Ground', 'Two-Day']),
+          shipFromCity: faker.location.city(),
+          shipFromState: faker.location.state({ abbreviated: true }),
+          shipFromPostalCode: faker.location.zipCode(),
+          shipFromCountry: 'US',
+          packageType: faker.helpers.arrayElement(['Rod Tube', 'Tackle Tray', 'Reel Box']),
+          packageWeightOz: new Prisma.Decimal(faker.number.float({ min: 12, max: 64, precision: 0.1 })),
+          packageLengthIn: new Prisma.Decimal(faker.number.float({ min: 18, max: 48, precision: 0.1 })),
+          packageWidthIn: new Prisma.Decimal(faker.number.float({ min: 4, max: 12, precision: 0.1 })),
+          packageHeightIn: new Prisma.Decimal(faker.number.float({ min: 3, max: 10, precision: 0.1 })),
+          insurancePreferred: faker.datatype.boolean(),
+          insuranceAmountCents: faker.number.int({ min: 1500, max: 45000 }),
+          signatureRequired: faker.datatype.boolean(),
+          handlingNotes: 'Packed with recycled foam and rod socks to protect sensitive tackle.',
+        },
+      })
+    )
+  );
+
+  return new Map(profiles.map((profile) => [profile.sellerId, profile.id]));
+}
+
 function createSlug(title: string) {
   const slugBase = faker.helpers.slugify(title).toLowerCase();
   return `${slugBase}-${faker.string.alphanumeric(6).toLowerCase()}`;
@@ -134,6 +180,7 @@ async function seedListings(
   sellers: { id: string; displayName: string }[],
   buyers: { id: string; displayName: string }[],
   addressByUser: Map<string, string>,
+  shippingProfileBySeller: Map<string, string>,
   supportAgentId: string
 ) {
   const createdListings = [] as { id: string; sellerId: string }[];
@@ -146,6 +193,30 @@ async function seedListings(
   for (const seller of sellers) {
     for (let i = 0; i < 3; i += 1) {
       const title = faker.commerce.productName();
+      const brand = faker.helpers.arrayElement(TACKLE_BRANDS);
+      const tackleCategory = faker.helpers.arrayElement([
+        TackleCategory.LURE,
+        TackleCategory.ROD,
+        TackleCategory.REEL,
+        TackleCategory.ROD_AND_REEL_COMBO,
+      ]);
+      const condition = faker.helpers.arrayElement([
+        TackleCondition.LIKE_NEW,
+        TackleCondition.EXCELLENT,
+        TackleCondition.GOOD,
+      ]);
+      const techniqueTags = faker.helpers.arrayElements(
+        TECHNIQUES,
+        faker.number.int({ min: 1, max: 3 }),
+      );
+      const seasonalHighlights = faker.helpers.arrayElements(
+        SEASONS,
+        faker.number.int({ min: 1, max: 3 }),
+      );
+      const autoAcceptCents = faker.number.int({ min: 14000, max: 32000 });
+      const minimumOfferCents = faker.number.int({ min: 9000, max: autoAcceptCents - 1000 });
+      const shippingProfileId = shippingProfileBySeller.get(seller.id) ?? null;
+
       const listing = await prisma.listing.create({
         data: {
           sellerId: seller.id,
@@ -156,6 +227,35 @@ async function seedListings(
           status: i === 0 ? ListingStatus.ACTIVE : ListingStatus.DRAFT,
           category: faker.commerce.department(),
           tags: faker.helpers.arrayElements(['vintage', 'handmade', 'rare', 'sale', 'limited'], 2),
+          brand,
+          modelName: `${brand} ${faker.color.human()} ${faker.word.noun()}`,
+          condition,
+          tackleCategory,
+          waterType: faker.helpers.arrayElement([WaterType.FRESHWATER, WaterType.BRACKISH]),
+          lureStyle: faker.helpers.arrayElement(LURE_STYLES),
+          targetSpecies: ['Largemouth Bass', 'Smallmouth Bass'],
+          techniqueTags,
+          seasonalUse: seasonalHighlights,
+          lineRatingLbMin: faker.number.int({ min: 10, max: 20 }),
+          lineRatingLbMax: faker.number.int({ min: 21, max: 35 }),
+          rodPower: faker.helpers.arrayElement(['Medium', 'Medium Heavy', 'Heavy']),
+          rodAction: faker.helpers.arrayElement(['Fast', 'Moderate Fast', 'Extra Fast']),
+          gearRatio: `${faker.number.int({ min: 5, max: 8 })}.${faker.number.int({ min: 0, max: 9 })}:1`,
+          bearingCount: faker.number.int({ min: 5, max: 12 }),
+          maxDragLb: new Prisma.Decimal(faker.number.float({ min: 12, max: 25, precision: 0.1 })),
+          weightOz: new Prisma.Decimal(faker.number.float({ min: 5, max: 9, precision: 0.1 })),
+          lengthIn: new Prisma.Decimal(faker.number.float({ min: 78, max: 96, precision: 0.1 })),
+          customNotes: 'Dialed for trophy bass in pressured reservoirs.',
+          autoAcceptOfferCents: autoAcceptCents,
+          minimumOfferCents,
+          shippingProfileId: shippingProfileId ?? undefined,
+          shippingWeightOz: new Prisma.Decimal(faker.number.float({ min: 20, max: 48, precision: 0.1 })),
+          shippingLengthIn: new Prisma.Decimal(faker.number.float({ min: 24, max: 48, precision: 0.1 })),
+          shippingWidthIn: new Prisma.Decimal(faker.number.float({ min: 4, max: 10, precision: 0.1 })),
+          shippingHeightIn: new Prisma.Decimal(faker.number.float({ min: 3, max: 8, precision: 0.1 })),
+          handlingTimeDays: faker.number.int({ min: 1, max: 3 }),
+          featuredPhotoUrl: faker.image.urlPicsumPhotos({ width: 800, height: 800 }),
+          seoKeywords: ['bass fishing', 'tackle', brand.toLowerCase()],
           images: {
             create: [
               {
@@ -175,26 +275,56 @@ async function seedListings(
   const heroListing = await prisma.listing.create({
     data: {
       sellerId: featureSeller?.id ?? supportAgentId,
-      title: 'Studio-grade mirrorless camera kit',
-      slug: 'studio-grade-mirrorless-camera-kit',
+      title: 'Signature frog rod & reel combo',
+      slug: 'signature-frog-rod-and-reel-combo',
       description:
-        'Meticulously maintained mirrorless camera with two lenses, premium strap, and protective case. Includes AI-crafted listing copy and optimized pricing from the demo flow.',
-      price: new Prisma.Decimal(1899.0),
+        'Tournament-ready frog setup tuned for matted grass and laydowns. Includes a 7\'3" heavy rod paired with a high-speed reel and braided line leader recommendations.',
+      price: new Prisma.Decimal(329.0),
       status: ListingStatus.ACTIVE,
-      category: 'Photography',
-      tags: ['mirrorless', 'pro-kit', 'demo'],
+      category: 'Bass Fishing Combos',
+      tags: ['frog-fishing', 'combo', 'topwater'],
+      brand: 'Megabass',
+      modelName: 'Orochi XXX Jungle Frog Special',
+      condition: TackleCondition.EXCELLENT,
+      tackleCategory: TackleCategory.ROD_AND_REEL_COMBO,
+      waterType: WaterType.FRESHWATER,
+      lureStyle: 'Hollow-body frog',
+      targetSpecies: ['Largemouth Bass', 'Snakehead'],
+      techniqueTags: ['Frog Fishing', 'Power Fishing'],
+      seasonalUse: ['Summer', 'Fall'],
+      lineRatingLbMin: 50,
+      lineRatingLbMax: 65,
+      rodPower: 'Heavy',
+      rodAction: 'Fast',
+      gearRatio: '8.1:1',
+      bearingCount: 11,
+      maxDragLb: new Prisma.Decimal(22),
+      weightOz: new Prisma.Decimal(7.8),
+      lengthIn: new Prisma.Decimal(87),
+      customNotes: 'Includes reel spooled with 65lb braid and trimmed EVA knobs for wet traction.',
+      autoAcceptOfferCents: 30000,
+      minimumOfferCents: 26000,
+      shippingProfileId: shippingProfileBySeller.get(featureSeller?.id ?? '') ?? undefined,
+      shippingWeightOz: new Prisma.Decimal(32),
+      shippingLengthIn: new Prisma.Decimal(45),
+      shippingWidthIn: new Prisma.Decimal(6),
+      shippingHeightIn: new Prisma.Decimal(5),
+      handlingTimeDays: 2,
+      featuredPhotoUrl:
+        'https://images.unsplash.com/photo-1520872024865-3ff2805d8bbf?auto=format&fit=crop&w=800&q=80',
+      seoKeywords: ['frog rod', 'topwater bass combo', 'heavy cover'],
       publishedAt: new Date(),
       images: {
         create: [
           {
-            url: 'https://images.unsplash.com/photo-1516728778615-2d590ea1856f?auto=format&fit=crop&w=800&q=80',
-            altText: 'Mirrorless camera kit',
+            url: 'https://images.unsplash.com/photo-1502720705749-3c925585bafc?auto=format&fit=crop&w=800&q=80',
+            altText: 'Frog rod and reel combo on deck',
             position: 0,
             isPrimary: true
           },
           {
-            url: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80',
-            altText: 'Camera lenses',
+            url: 'https://images.unsplash.com/photo-1520872024865-3ff2805d8bbf?auto=format&fit=crop&w=800&q=80',
+            altText: 'Heavy cover bass habitat',
             position: 1
           }
         ]
@@ -206,9 +336,9 @@ async function seedListings(
     data: {
       listingId: heroListing.id,
       buyerId: buyers[0]?.id ?? sellers[0]?.id ?? supportAgentId,
-      amount: new Prisma.Decimal(1800),
+      amount: new Prisma.Decimal(310),
       status: OfferStatus.PENDING,
-      message: 'Would you consider $1800 with local pickup?'
+      message: 'Would you consider $310 shipped with signature confirmation?'
     }
   });
 }
@@ -234,6 +364,8 @@ async function seedListings(
         if (shouldCreateOrder) {
           const shippingAddressId = addressByUser.get(buyer.id) ?? null;
           const billingAddressId = addressByUser.get(buyer.id) ?? null;
+          const isGift = faker.datatype.boolean({ probability: 0.2 });
+          const tackleTechniqueFocus = techniqueTags[0] ?? 'Power Fishing';
 
           const status = faker.helpers.arrayElement([
             OrderStatus.CONFIRMED,
@@ -254,6 +386,18 @@ async function seedListings(
               quantity: 1,
               shippingAddressId,
               billingAddressId,
+              subtotalAmount: offer.amount,
+              shippingProfileId: listing.shippingProfileId ?? undefined,
+              targetSpecies: listing.targetSpecies,
+              tackleTechnique: tackleTechniqueFocus,
+              preferredDeliveryWindow: faker.helpers.arrayElement([
+                'Within 1 week',
+                'Before upcoming tournament',
+                'Flexible',
+              ]),
+              buyerNote: 'Please ship with extra padding for the reel handle.',
+              isGift,
+              giftMessage: isGift ? 'Tight lines and big bites!' : null,
               timelineEvents: {
                 create: [
                   {
@@ -292,7 +436,17 @@ async function seedListings(
                 carrier: 'UPS',
                 trackingNumber: faker.string.alphanumeric(12).toUpperCase(),
                 shippedAt: faker.date.recent({ days: 5 }),
-                deliveredAt: faker.date.recent({ days: 2 })
+                deliveredAt: faker.date.recent({ days: 2 }),
+                shippingProfileId: listing.shippingProfileId ?? undefined,
+                packageWeightOz: listing.shippingWeightOz ?? new Prisma.Decimal(28),
+                packageLengthIn: listing.shippingLengthIn ?? new Prisma.Decimal(42),
+                packageWidthIn: listing.shippingWidthIn ?? new Prisma.Decimal(6),
+                packageHeightIn: listing.shippingHeightIn ?? new Prisma.Decimal(5),
+                requiresSignature: faker.datatype.boolean({ probability: 0.4 }),
+                insuredAmount: new Prisma.Decimal(faker.number.float({ min: 50, max: 400, precision: 0.01 })),
+                pickupScheduledAt: faker.date.recent({ days: 6 }),
+                droppedOffAt: faker.date.recent({ days: 5 }),
+                estimatedDeliveryAt: faker.date.soon({ days: 3 })
               }
             });
 
@@ -389,8 +543,17 @@ async function main() {
   console.info('Seeding addresses...');
   const addressByUser = await seedAddresses(users);
 
+  console.info('Seeding shipping profiles...');
+  const shippingProfileBySeller = await seedShippingProfiles(users.sellers);
+
   console.info('Seeding listings, offers, and orders...');
-  await seedListings(users.sellers, users.buyers, addressByUser, users.support.id);
+  await seedListings(
+    users.sellers,
+    users.buyers,
+    addressByUser,
+    shippingProfileBySeller,
+    users.support.id
+  );
 
   console.info('Seeding completed successfully.');
 }

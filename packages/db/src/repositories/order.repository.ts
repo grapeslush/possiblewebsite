@@ -19,6 +19,20 @@ export interface CreateOrderInput {
   quantity?: number;
   shippingAddressId?: string | null;
   billingAddressId?: string | null;
+  subtotalAmount?: number | string | Prisma.Decimal | null;
+  shippingAmount?: number | string | Prisma.Decimal | null;
+  taxAmount?: number | string | Prisma.Decimal | null;
+  discountAmount?: number | string | Prisma.Decimal | null;
+  serviceFeeAmount?: number | string | Prisma.Decimal | null;
+  insuranceAmount?: number | string | Prisma.Decimal | null;
+  shippingProfileId?: string | null;
+  buyerNote?: string | null;
+  sellerNote?: string | null;
+  tackleTechnique?: string | null;
+  targetSpecies?: string[];
+  preferredDeliveryWindow?: string | null;
+  isGift?: boolean;
+  giftMessage?: string | null;
   items?: Array<{
     listingId: string;
     offerId?: string | null;
@@ -32,6 +46,14 @@ export class OrderRepository {
 
   async createOrder(input: CreateOrderInput) {
     return this.prisma.$transaction(async (tx) => {
+      const hasItems = Boolean(input.items && input.items.length);
+      const computedSubtotal = hasItems
+        ? input.items!.reduce(
+            (acc, item) => acc.add(toDecimal(item.unitPrice).mul(item.quantity ?? 1)),
+            new Prisma.Decimal(0),
+          )
+        : undefined;
+
       const order = await tx.order.create({
         data: {
           listingId: input.listingId,
@@ -45,6 +67,50 @@ export class OrderRepository {
             input.shippingAddressId === undefined ? undefined : input.shippingAddressId,
           billingAddressId:
             input.billingAddressId === undefined ? undefined : input.billingAddressId,
+          subtotalAmount:
+            input.subtotalAmount === undefined
+              ? computedSubtotal ?? undefined
+              : input.subtotalAmount === null
+                ? null
+                : toDecimal(input.subtotalAmount),
+          shippingAmount:
+            input.shippingAmount === undefined
+              ? undefined
+              : input.shippingAmount === null
+                ? null
+                : toDecimal(input.shippingAmount),
+          taxAmount:
+            input.taxAmount === undefined
+              ? undefined
+              : input.taxAmount === null
+                ? null
+                : toDecimal(input.taxAmount),
+          discountAmount:
+            input.discountAmount === undefined
+              ? undefined
+              : input.discountAmount === null
+                ? null
+                : toDecimal(input.discountAmount),
+          serviceFeeAmount:
+            input.serviceFeeAmount === undefined
+              ? undefined
+              : input.serviceFeeAmount === null
+                ? null
+                : toDecimal(input.serviceFeeAmount),
+          insuranceAmount:
+            input.insuranceAmount === undefined
+              ? undefined
+              : input.insuranceAmount === null
+                ? null
+                : toDecimal(input.insuranceAmount),
+          shippingProfileId: input.shippingProfileId ?? undefined,
+          buyerNote: input.buyerNote ?? undefined,
+          sellerNote: input.sellerNote ?? undefined,
+          tackleTechnique: input.tackleTechnique ?? undefined,
+          targetSpecies: input.targetSpecies ?? [],
+          preferredDeliveryWindow: input.preferredDeliveryWindow ?? undefined,
+          isGift: input.isGift ?? false,
+          giftMessage: input.giftMessage ?? undefined,
           items:
             input.items && input.items.length
               ? {
@@ -65,6 +131,7 @@ export class OrderRepository {
         },
         include: {
           listing: true,
+          shippingProfile: true,
         },
       });
 
@@ -89,12 +156,27 @@ export class OrderRepository {
       where: { id: orderId },
       include: {
         listing: true,
+        shippingProfile: true,
         buyer: true,
         seller: true,
         payment: true,
         shipment: true,
         timelineEvents: {
           orderBy: { createdAt: 'asc' },
+        },
+        threads: {
+          include: {
+            participants: {
+              include: {
+                user: {
+                  select: { id: true, displayName: true, avatarUrl: true },
+                },
+              },
+            },
+            messages: {
+              orderBy: { sentAt: 'asc' },
+            },
+          },
         },
       },
     });
@@ -174,6 +256,16 @@ export class OrderRepository {
       labelCost?: number | string | Prisma.Decimal | null;
       labelCurrency?: string | null;
       labelPurchasedAt?: Date | null;
+      shippingProfileId?: string | null;
+      packageWeightOz?: number | string | Prisma.Decimal | null;
+      packageLengthIn?: number | string | Prisma.Decimal | null;
+      packageWidthIn?: number | string | Prisma.Decimal | null;
+      packageHeightIn?: number | string | Prisma.Decimal | null;
+      requiresSignature?: boolean | null;
+      insuredAmount?: number | string | Prisma.Decimal | null;
+      pickupScheduledAt?: Date | null;
+      droppedOffAt?: Date | null;
+      estimatedDeliveryAt?: Date | null;
     },
   ) {
     return this.prisma.shipment.upsert({
@@ -198,6 +290,41 @@ export class OrderRepository {
             : toDecimal(options.labelCost),
         labelCurrency: options?.labelCurrency ?? undefined,
         labelPurchasedAt: options?.labelPurchasedAt ?? new Date(),
+        shippingProfileId: options?.shippingProfileId ?? undefined,
+        packageWeightOz:
+          options?.packageWeightOz === undefined
+            ? undefined
+            : options?.packageWeightOz === null
+              ? null
+              : toDecimal(options.packageWeightOz),
+        packageLengthIn:
+          options?.packageLengthIn === undefined
+            ? undefined
+            : options?.packageLengthIn === null
+              ? null
+              : toDecimal(options.packageLengthIn),
+        packageWidthIn:
+          options?.packageWidthIn === undefined
+            ? undefined
+            : options?.packageWidthIn === null
+              ? null
+              : toDecimal(options.packageWidthIn),
+        packageHeightIn:
+          options?.packageHeightIn === undefined
+            ? undefined
+            : options?.packageHeightIn === null
+              ? null
+              : toDecimal(options.packageHeightIn),
+        requiresSignature: options?.requiresSignature ?? undefined,
+        insuredAmount:
+          options?.insuredAmount === undefined
+            ? undefined
+            : options?.insuredAmount === null
+              ? null
+              : toDecimal(options.insuredAmount),
+        pickupScheduledAt: options?.pickupScheduledAt ?? undefined,
+        droppedOffAt: options?.droppedOffAt ?? undefined,
+        estimatedDeliveryAt: options?.estimatedDeliveryAt ?? undefined,
         shippedAt: new Date(),
       },
       create: {
@@ -221,6 +348,41 @@ export class OrderRepository {
             : toDecimal(options.labelCost),
         labelCurrency: options?.labelCurrency ?? undefined,
         labelPurchasedAt: options?.labelPurchasedAt ?? new Date(),
+        shippingProfileId: options?.shippingProfileId ?? undefined,
+        packageWeightOz:
+          options?.packageWeightOz === undefined
+            ? undefined
+            : options?.packageWeightOz === null
+              ? null
+              : toDecimal(options.packageWeightOz),
+        packageLengthIn:
+          options?.packageLengthIn === undefined
+            ? undefined
+            : options?.packageLengthIn === null
+              ? null
+              : toDecimal(options.packageLengthIn),
+        packageWidthIn:
+          options?.packageWidthIn === undefined
+            ? undefined
+            : options?.packageWidthIn === null
+              ? null
+              : toDecimal(options.packageWidthIn),
+        packageHeightIn:
+          options?.packageHeightIn === undefined
+            ? undefined
+            : options?.packageHeightIn === null
+              ? null
+              : toDecimal(options.packageHeightIn),
+        requiresSignature: options?.requiresSignature ?? undefined,
+        insuredAmount:
+          options?.insuredAmount === undefined
+            ? undefined
+            : options?.insuredAmount === null
+              ? null
+              : toDecimal(options.insuredAmount),
+        pickupScheduledAt: options?.pickupScheduledAt ?? undefined,
+        droppedOffAt: options?.droppedOffAt ?? undefined,
+        estimatedDeliveryAt: options?.estimatedDeliveryAt ?? undefined,
         shippedAt: new Date(),
       },
     });

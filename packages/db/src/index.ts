@@ -2,6 +2,9 @@ export { prisma } from './prisma';
 export {
   AddressType,
   ListingStatus,
+  TackleCategory,
+  TackleCondition,
+  WaterType,
   NotificationType,
   OrderEventType,
   OrderStatus,
@@ -9,7 +12,16 @@ export {
   ReviewStatus,
   ShipmentStatus,
   ShipmentTrackingStatus,
+  HelpArticleStatus,
+  ThreadType,
+  MessageType,
   type PolicyAcceptance,
+  type Policy,
+  type HelpArticle,
+  type Thread,
+  type ThreadParticipant,
+  type Message,
+  type RecommendationCache,
   type TotpDevice,
 } from '@prisma/client';
 export { UserRepository } from './repositories/user.repository';
