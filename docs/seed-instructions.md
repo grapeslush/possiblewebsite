@@ -1,25 +1,30 @@
 # Seed data instructions
 
-The repository ships with a Prisma seed script that generates demo users, listings, and supporting entities. Follow these steps to run it locally:
+The Prisma seed script now loads a fully curated tackle marketplace that mirrors our escrow and compliance flows. Run it whenever you refresh the database or need to demo the end-to-end experience.
 
-1. Ensure PostgreSQL is running and update your `.env` or shell with a valid `DATABASE_URL` (for example `postgresql://possible:possible@localhost:5432/possible`).
-2. Install dependencies with `pnpm install`.
-3. Apply the latest migrations:
+## Prerequisites
+
+1. Ensure PostgreSQL is running and export a valid `DATABASE_URL` (for example `postgresql://possible:possible@localhost:5432/possible`).
+2. Install dependencies with `pnpm install` from the repository root.
+3. Apply migrations:
 
    ```bash
    pnpm --filter @possiblewebsite/db run prisma:migrate
    ```
 
-4. Execute the seed script:
+4. Seed the catalog, policies, and relational data:
 
    ```bash
    pnpm --filter @possiblewebsite/db run prisma:seed
    ```
 
-The seed populates:
+The script ingests curated fixtures from `apps/web/public/seed-images/` and `docs/help/` and creates:
 
-- Example buyers and sellers with verified identities
-- Listings, images, and inventory levels
-- Offers, orders, payouts, and moderation events for observability testing
+- 200+ listings across rods, reels, lures, combos, electronics, apparel, storage, and boat accessories.
+- Verified buyers, sellers with Stripe Connect IDs, admins, and support staff—each with policy acceptances and address records.
+- Offers covering every status, carts, escrow-backed orders, payouts, shipments with tracking metadata, reviews, disputes, and support threads.
+- Help-center articles that reference the compliance policies used during seeding.
 
-Seed data is idempotent—running the script multiple times updates existing records instead of duplicating them.
+Each user account (admin, support, every buyer and seller) shares the demo password **`demoPass123!`** so QA can exercise onboarding and role-based dashboards immediately after running the seed.
+
+> **Tip:** The seed is idempotent. Rerunning it wipes existing demo data and reloads the curated fixtures, keeping provenance notes, AI audit strings, and policy versions consistent for regression testing.

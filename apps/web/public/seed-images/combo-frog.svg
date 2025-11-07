@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">
+  <rect width="320" height="200" fill="#052e16"/>
+  <path d="M30 150 L250 110" stroke="#22c55e" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="260" cy="108" r="22" fill="#14532d" stroke="#86efac" stroke-width="4"/>
+  <rect x="210" y="70" width="70" height="28" rx="12" fill="#bbf7d0"/>
+  <text x="24" y="46" fill="#bbf7d0" font-size="24" font-family="'Segoe UI',sans-serif">Frog Rod + Reel Combo</text>
+  <text x="24" y="172" fill="#4ade80" font-size="17" font-family="'Segoe UI',sans-serif">65 lb braid • Mat punching tuned</text>
+</svg>
