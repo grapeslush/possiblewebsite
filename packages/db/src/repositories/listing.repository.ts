@@ -1,4 +1,11 @@
-import { ListingStatus, Prisma, PrismaClient } from '@prisma/client';
+import {
+  ListingStatus,
+  Prisma,
+  PrismaClient,
+  TackleCategory,
+  TackleCondition,
+  WaterType,
+} from '@prisma/client';
 import { toDecimal } from '../utils/decimal';
 
 export interface CreateListingInput {
@@ -11,6 +18,36 @@ export interface CreateListingInput {
   quantity?: number;
   category?: string | null;
   tags?: string[];
+  brand: string;
+  modelName?: string | null;
+  condition?: TackleCondition;
+  tackleCategory?: TackleCategory | null;
+  waterType?: WaterType | null;
+  lureStyle?: string | null;
+  targetSpecies?: string[];
+  techniqueTags?: string[];
+  seasonalUse?: string[];
+  lineRatingLbMin?: number | null;
+  lineRatingLbMax?: number | null;
+  rodPower?: string | null;
+  rodAction?: string | null;
+  gearRatio?: string | null;
+  bearingCount?: number | null;
+  maxDragLb?: number | string | Prisma.Decimal | null;
+  weightOz?: number | string | Prisma.Decimal | null;
+  lengthIn?: number | string | Prisma.Decimal | null;
+  customNotes?: string | null;
+  autoAcceptOfferCents?: number | null;
+  minimumOfferCents?: number | null;
+  shippingProfileId?: string | null;
+  shippingWeightOz?: number | string | Prisma.Decimal | null;
+  shippingLengthIn?: number | string | Prisma.Decimal | null;
+  shippingWidthIn?: number | string | Prisma.Decimal | null;
+  shippingHeightIn?: number | string | Prisma.Decimal | null;
+  handlingTimeDays?: number | null;
+  featuredPhotoUrl?: string | null;
+  compliancePolicyId?: string | null;
+  seoKeywords?: string[];
   images?: { url: string; altText?: string | null; position?: number; isPrimary?: boolean }[];
 }
 
@@ -44,6 +81,71 @@ export class ListingRepository {
         quantity: input.quantity ?? 1,
         category: input.category ?? undefined,
         tags: input.tags ?? [],
+        brand: input.brand,
+        modelName: input.modelName ?? undefined,
+        condition: input.condition ?? TackleCondition.GOOD,
+        tackleCategory: input.tackleCategory ?? undefined,
+        waterType: input.waterType ?? undefined,
+        lureStyle: input.lureStyle ?? undefined,
+        targetSpecies: input.targetSpecies ?? [],
+        techniqueTags: input.techniqueTags ?? [],
+        seasonalUse: input.seasonalUse ?? [],
+        lineRatingLbMin: input.lineRatingLbMin ?? undefined,
+        lineRatingLbMax: input.lineRatingLbMax ?? undefined,
+        rodPower: input.rodPower ?? undefined,
+        rodAction: input.rodAction ?? undefined,
+        gearRatio: input.gearRatio ?? undefined,
+        bearingCount: input.bearingCount ?? undefined,
+        maxDragLb:
+          input.maxDragLb === undefined
+            ? undefined
+            : input.maxDragLb === null
+              ? null
+              : toDecimal(input.maxDragLb),
+        weightOz:
+          input.weightOz === undefined
+            ? undefined
+            : input.weightOz === null
+              ? null
+              : toDecimal(input.weightOz),
+        lengthIn:
+          input.lengthIn === undefined
+            ? undefined
+            : input.lengthIn === null
+              ? null
+              : toDecimal(input.lengthIn),
+        customNotes: input.customNotes ?? undefined,
+        autoAcceptOfferCents: input.autoAcceptOfferCents ?? undefined,
+        minimumOfferCents: input.minimumOfferCents ?? undefined,
+        shippingProfileId: input.shippingProfileId ?? undefined,
+        shippingWeightOz:
+          input.shippingWeightOz === undefined
+            ? undefined
+            : input.shippingWeightOz === null
+              ? null
+              : toDecimal(input.shippingWeightOz),
+        shippingLengthIn:
+          input.shippingLengthIn === undefined
+            ? undefined
+            : input.shippingLengthIn === null
+              ? null
+              : toDecimal(input.shippingLengthIn),
+        shippingWidthIn:
+          input.shippingWidthIn === undefined
+            ? undefined
+            : input.shippingWidthIn === null
+              ? null
+              : toDecimal(input.shippingWidthIn),
+        shippingHeightIn:
+          input.shippingHeightIn === undefined
+            ? undefined
+            : input.shippingHeightIn === null
+              ? null
+              : toDecimal(input.shippingHeightIn),
+        handlingTimeDays: input.handlingTimeDays ?? undefined,
+        featuredPhotoUrl: input.featuredPhotoUrl ?? undefined,
+        compliancePolicyId: input.compliancePolicyId ?? undefined,
+        seoKeywords: input.seoKeywords ?? [],
         images: input.images
           ? {
               create: input.images.map((image, index) => ({
@@ -57,6 +159,8 @@ export class ListingRepository {
       },
       include: {
         images: true,
+        shippingProfile: true,
+        compliancePolicy: true,
       },
     });
   }
@@ -106,6 +210,8 @@ export class ListingRepository {
             position: 'asc',
           },
         },
+        shippingProfile: true,
+        compliancePolicy: true,
       },
       orderBy: {
         createdAt: 'desc',
@@ -138,6 +244,8 @@ export class ListingRepository {
         images: {
           orderBy: { position: 'asc' },
         },
+        shippingProfile: true,
+        compliancePolicy: true,
         offers: {
           orderBy: { createdAt: 'desc' },
           include: {
@@ -211,6 +319,7 @@ export class ListingRepository {
           images: {
             orderBy: { position: 'asc' },
           },
+          shippingProfile: true,
         },
       });
 
@@ -235,6 +344,7 @@ export class ListingRepository {
           images: {
             orderBy: { position: 'asc' },
           },
+          shippingProfile: true,
         },
         orderBy: { createdAt: 'desc' },
         take: limit,

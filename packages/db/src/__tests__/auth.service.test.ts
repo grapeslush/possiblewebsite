@@ -3,8 +3,10 @@ import { authenticator } from 'otplib';
 import type { PolicyAcceptance, PrismaClient, TotpDevice, User } from '@prisma/client';
 import { AuthService } from '../services/auth.service';
 
-const buildPrisma = () => {
-  const prisma: Partial<PrismaClient> = {
+type PrismaMock = jest.Mocked<PrismaClient>;
+
+const buildPrisma = (): PrismaMock => {
+  const prisma = {
     verificationToken: {
       create: jest.fn(),
       findUnique: jest.fn(),
@@ -21,14 +23,12 @@ const buildPrisma = () => {
       create: jest.fn(),
       update: jest.fn(),
     },
-    $transaction: jest.fn(async (operations: readonly Promise<unknown>[]) => {
-      for (const operation of operations) {
-        await operation;
-      }
-    }),
-  };
+    $transaction: jest.fn(async (operations: readonly Promise<unknown>[]) =>
+      Promise.all(operations),
+    ),
+  } satisfies Record<string, unknown>;
 
-  return prisma as unknown as PrismaClient;
+  return prisma as unknown as PrismaMock;
 };
 
 describe('AuthService', () => {
@@ -70,12 +70,14 @@ describe('AuthService', () => {
       expires: new Date(Date.now() + 1000),
     };
 
-    prisma.verificationToken.findUnique = jest.fn().mockResolvedValue(record);
-    prisma.user.findUnique = jest.fn().mockResolvedValue(user);
-    prisma.$transaction = jest.fn(async (operations: readonly Promise<unknown>[]) => {
-      await operations[0];
-      await operations[1];
-    });
+    (prisma.verificationToken.findUnique as unknown as jest.Mock).mockResolvedValue(record);
+    (prisma.user.findUnique as unknown as jest.Mock).mockResolvedValue(user);
+    (prisma.$transaction as unknown as jest.Mock).mockImplementation(
+      async (operations: readonly Promise<unknown>[]) => {
+        await Promise.all(operations);
+        return operations;
+      },
+    );
 
     const userId = await service.verifyEmailToken(token);
 
@@ -92,16 +94,16 @@ describe('AuthService', () => {
       {
         id: faker.string.uuid(),
         userId: faker.string.uuid(),
-        policy: 'terms',
-        version: '2024-01-01',
+        policyId: 'terms',
+        policyVersion: '2024-01-01',
         acceptedAt: new Date(),
         ipAddress: null,
       },
       {
         id: faker.string.uuid(),
         userId: faker.string.uuid(),
-        policy: 'privacy',
-        version: '2024-01-01',
+        policyId: 'privacy',
+        policyVersion: '2024-01-01',
         acceptedAt: new Date(),
         ipAddress: null,
       },
@@ -128,8 +130,8 @@ describe('AuthService', () => {
       createdAt: new Date(),
     };
 
-    prisma.totpDevice.update = jest.fn().mockResolvedValue(device);
-    prisma.user.update = jest.fn().mockResolvedValue({} as User);
+    (prisma.totpDevice.update as unknown as jest.Mock).mockResolvedValue(device);
+    (prisma.user.update as unknown as jest.Mock).mockResolvedValue({});
 
     const token = authenticator.generate(secret);
     const verified = await service.verifyTotpCode(device, token);

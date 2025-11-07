@@ -3,6 +3,7 @@ import type { PolicyAcceptance } from '@prisma/client';
 export type RequiredPolicy = {
   policy: string;
   version: string;
+  title?: string;
 };
 
 const DEFAULT_POLICIES: RequiredPolicy[] = [
@@ -24,7 +25,8 @@ export const missingPolicies = (acceptances: PolicyAcceptance[]) => {
   return requirements.filter((requirement) => {
     return !acceptances.some(
       (acceptance) =>
-        acceptance.policy === requirement.policy && acceptance.version === requirement.version
+        acceptance.policyId === requirement.policy &&
+        acceptance.policyVersion === requirement.version
     );
   });
 };

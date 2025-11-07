@@ -8,6 +8,12 @@ import { stripe } from '@/lib/stripe';
 
 const authService = new AuthService(prisma);
 
+const formatPolicyTitle = (slug: string) =>
+  slug
+    .split('-')
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(' ');
+
 const validateBody = (body: any) => {
   if (!body) return { error: 'Missing body' };
   const { email, password, displayName, dateOfBirth, marketingOptIn = false, acceptPolicies } = body;
@@ -70,7 +76,10 @@ export async function POST(request: Request) {
   );
 
   if (missingPolicy) {
-    return NextResponse.json({ error: `Missing acceptance for ${missingPolicy.policy}` }, { status: 400 });
+    return NextResponse.json(
+      { error: `Missing acceptance for ${formatPolicyTitle(missingPolicy.policy)}` },
+      { status: 400 }
+    );
   }
 
   const passwordHash = await hash(result.password, 12);
@@ -88,9 +97,34 @@ export async function POST(request: Request) {
     });
 
     await Promise.all(
-      requiredPolicies.map((policy) =>
-        authService.recordPolicyAcceptance(user.id, policy.policy, policy.version, null)
-      )
+      requiredPolicies.map(async (policy) => {
+        const title = formatPolicyTitle(policy.policy);
+        const record = await prisma.policy.upsert({
+          where: { slug: policy.policy },
+          update: {
+            title,
+            version: policy.version,
+            isActive: true,
+            publishedAt: new Date()
+          },
+          create: {
+            id: policy.policy,
+            slug: policy.policy,
+            title,
+            summary: `${title} for the Bassline Tackle Exchange community.`,
+            body: `Review and accept the ${title} to trade bass fishing tackle responsibly on Bassline Tackle Exchange.`,
+            category: 'marketplace',
+            version: policy.version,
+            audience: 'all-users',
+            isRequiredForBuyers: true,
+            isRequiredForSellers: true,
+            isActive: true,
+            publishedAt: new Date()
+          }
+        });
+
+        await authService.recordPolicyAcceptance(user.id, record.id, record.version, null);
+      })
     );
 
     if (stripe) {

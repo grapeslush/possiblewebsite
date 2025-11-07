@@ -1,4 +1,4 @@
-import { ListingStatus } from '@prisma/client';
+import { ListingStatus, TackleCategory, TackleCondition, WaterType } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -24,8 +24,62 @@ const createSchema = z.object({
   quantity: z.number().int().min(1).max(1000).default(1),
   category: z.string().min(2).max(60).optional(),
   tags: z.array(z.string().min(2)).max(12).optional(),
+  brand: z.string().min(2).max(120),
+  modelName: z.string().min(1).max(120).optional(),
+  condition: z.nativeEnum(TackleCondition).default(TackleCondition.GOOD),
+  tackleCategory: z.nativeEnum(TackleCategory).optional(),
+  waterType: z.nativeEnum(WaterType).optional(),
+  lureStyle: z.string().min(2).max(120).optional(),
+  targetSpecies: z.array(z.string().min(2).max(60)).max(12).default([]),
+  techniqueTags: z.array(z.string().min(2).max(60)).max(12).default([]),
+  seasonalUse: z.array(z.string().min(2).max(60)).max(6).default([]),
+  lineRatingLbMin: z.number().int().min(1).max(200).optional(),
+  lineRatingLbMax: z.number().int().min(1).max(200).optional(),
+  rodPower: z.string().min(2).max(60).optional(),
+  rodAction: z.string().min(2).max(60).optional(),
+  gearRatio: z.string().min(1).max(30).optional(),
+  bearingCount: z.number().int().min(0).max(20).optional(),
+  maxDragLb: z.number().positive().max(150).optional(),
+  weightOz: z.number().positive().max(160).optional(),
+  lengthIn: z.number().positive().max(144).optional(),
+  customNotes: z.string().max(2000).optional(),
+  autoAcceptOfferCents: z.number().int().min(0).max(1000000).optional(),
+  minimumOfferCents: z.number().int().min(0).max(1000000).optional(),
+  shippingProfileId: z.string().uuid().optional(),
+  shippingWeightOz: z.number().positive().max(800).optional(),
+  shippingLengthIn: z.number().positive().max(120).optional(),
+  shippingWidthIn: z.number().positive().max(120).optional(),
+  shippingHeightIn: z.number().positive().max(120).optional(),
+  handlingTimeDays: z.number().int().min(0).max(14).optional(),
+  featuredPhotoUrl: z.string().url().optional(),
+  compliancePolicyId: z.string().uuid().optional(),
+  seoKeywords: z.array(z.string().min(2).max(40)).max(24).optional(),
   publish: z.boolean().default(false),
   images: z.array(imageSchema).min(1)
+}).superRefine((data, ctx) => {
+  if (
+    data.lineRatingLbMin !== undefined &&
+    data.lineRatingLbMax !== undefined &&
+    data.lineRatingLbMin > data.lineRatingLbMax
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Minimum line rating must be less than or equal to maximum line rating.',
+      path: ['lineRatingLbMin']
+    });
+  }
+
+  if (
+    data.autoAcceptOfferCents !== undefined &&
+    data.minimumOfferCents !== undefined &&
+    data.autoAcceptOfferCents < data.minimumOfferCents
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Auto-accept offer threshold must be higher than or equal to the minimum offer.',
+      path: ['autoAcceptOfferCents']
+    });
+  }
 });
 
 const searchSchema = z.object({
@@ -107,6 +161,36 @@ export async function POST(request: NextRequest) {
       quantity: parsed.data.quantity,
       category: parsed.data.category,
       tags: parsed.data.tags,
+      brand: parsed.data.brand,
+      modelName: parsed.data.modelName,
+      condition: parsed.data.condition,
+      tackleCategory: parsed.data.tackleCategory,
+      waterType: parsed.data.waterType,
+      lureStyle: parsed.data.lureStyle,
+      targetSpecies: parsed.data.targetSpecies,
+      techniqueTags: parsed.data.techniqueTags,
+      seasonalUse: parsed.data.seasonalUse,
+      lineRatingLbMin: parsed.data.lineRatingLbMin,
+      lineRatingLbMax: parsed.data.lineRatingLbMax,
+      rodPower: parsed.data.rodPower,
+      rodAction: parsed.data.rodAction,
+      gearRatio: parsed.data.gearRatio,
+      bearingCount: parsed.data.bearingCount,
+      maxDragLb: parsed.data.maxDragLb,
+      weightOz: parsed.data.weightOz,
+      lengthIn: parsed.data.lengthIn,
+      customNotes: parsed.data.customNotes,
+      autoAcceptOfferCents: parsed.data.autoAcceptOfferCents,
+      minimumOfferCents: parsed.data.minimumOfferCents,
+      shippingProfileId: parsed.data.shippingProfileId,
+      shippingWeightOz: parsed.data.shippingWeightOz,
+      shippingLengthIn: parsed.data.shippingLengthIn,
+      shippingWidthIn: parsed.data.shippingWidthIn,
+      shippingHeightIn: parsed.data.shippingHeightIn,
+      handlingTimeDays: parsed.data.handlingTimeDays,
+      featuredPhotoUrl: parsed.data.featuredPhotoUrl,
+      compliancePolicyId: parsed.data.compliancePolicyId,
+      seoKeywords: parsed.data.seoKeywords,
       images: parsed.data.images
     });
 

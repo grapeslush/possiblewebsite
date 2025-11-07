@@ -58,26 +58,29 @@ export class AuthService {
 
   async recordPolicyAcceptance(
     userId: string,
-    policy: string,
-    version: string,
+    policyId: string,
+    policyVersion: string,
     ipAddress?: string | null
   ) {
     return this.prisma.policyAcceptance.create({
       data: {
         userId,
-        policy,
-        version,
+        policyId,
+        policyVersion,
         ipAddress: ipAddress ?? undefined
       }
     });
   }
 
   hasAcceptedPolicy(
-    policy: string,
-    version: string,
+    policyId: string,
+    policyVersion: string,
     acceptances: PolicyAcceptance[]
   ) {
-    return acceptances.some((acceptance) => acceptance.policy === policy && acceptance.version === version);
+    return acceptances.some(
+      (acceptance) =>
+        acceptance.policyId === policyId && acceptance.policyVersion === policyVersion
+    );
   }
 
   generateTotpSecret(label: string, issuer: string) {

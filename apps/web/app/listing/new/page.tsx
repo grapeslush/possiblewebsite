@@ -2,6 +2,8 @@
 
 import { ChangeEvent, FormEvent, useMemo, useState } from 'react';
 
+import { TackleCategory, TackleCondition, WaterType } from '@possiblewebsite/db';
+
 import { Button } from '@/components/ui/button';
 
 interface VisionSummary {
@@ -19,6 +21,76 @@ interface PricingSummary {
   rationale?: string;
 }
 
+interface FormState {
+  sellerId: string;
+  title: string;
+  description: string;
+  category: string;
+  tags: string[];
+  price: string;
+  currency: string;
+  brand: string;
+  modelName: string;
+  tackleCategory: TackleCategory | '';
+  condition: TackleCondition;
+  waterType: WaterType | '';
+  lureStyle: string;
+  targetSpecies: string;
+  techniqueTags: string;
+  seasonalUse: string;
+  lineRatingLbMin: string;
+  lineRatingLbMax: string;
+  rodPower: string;
+  rodAction: string;
+  gearRatio: string;
+  bearingCount: string;
+  maxDragLb: string;
+  weightOz: string;
+  lengthIn: string;
+  customNotes: string;
+  autoAcceptOfferCents: string;
+  minimumOfferCents: string;
+  shippingProfileId: string;
+  shippingWeightOz: string;
+  shippingLengthIn: string;
+  shippingWidthIn: string;
+  shippingHeightIn: string;
+  handlingTimeDays: string;
+  featuredPhotoUrl: string;
+  compliancePolicyId: string;
+  seoKeywords: string;
+}
+
+const tackleConditions = Object.values(TackleCondition);
+const tackleCategories = Object.values(TackleCategory);
+const waterTypes = Object.values(WaterType);
+
+const defaultTargetSpecies = 'Largemouth Bass, Smallmouth Bass';
+
+const formatEnumLabel = (value: string) =>
+  value
+    .toLowerCase()
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+
+const parseCsv = (value: string) =>
+  value
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+const parseFloatOrUndefined = (value: string) => {
+  if (!value.trim()) return undefined;
+  const parsed = Number(value);
+  return Number.isNaN(parsed) ? undefined : parsed;
+};
+
+const parseIntOrUndefined = (value: string) => {
+  if (!value.trim()) return undefined;
+  const parsed = Number.parseInt(value.trim(), 10);
+  return Number.isNaN(parsed) ? undefined : parsed;
+};
+
 const demoSellerId =
   process.env.NEXT_PUBLIC_DEMO_SELLER_ID ?? '11111111-1111-1111-1111-111111111111';
 
@@ -34,14 +106,44 @@ export default function ListingWizardPage() {
   const [error, setError] = useState<string | null>(null);
   const [publishedSlug, setPublishedSlug] = useState<string | null>(null);
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<FormState>({
     sellerId: demoSellerId,
     title: '',
     description: '',
     category: '',
-    tags: [] as string[],
+    tags: [],
     price: '',
     currency: 'USD',
+    brand: '',
+    modelName: '',
+    tackleCategory: '',
+    condition: TackleCondition.GOOD,
+    waterType: '',
+    lureStyle: '',
+    targetSpecies: defaultTargetSpecies,
+    techniqueTags: '',
+    seasonalUse: '',
+    lineRatingLbMin: '',
+    lineRatingLbMax: '',
+    rodPower: '',
+    rodAction: '',
+    gearRatio: '',
+    bearingCount: '',
+    maxDragLb: '',
+    weightOz: '',
+    lengthIn: '',
+    customNotes: '',
+    autoAcceptOfferCents: '',
+    minimumOfferCents: '',
+    shippingProfileId: '',
+    shippingWeightOz: '',
+    shippingLengthIn: '',
+    shippingWidthIn: '',
+    shippingHeightIn: '',
+    handlingTimeDays: '',
+    featuredPhotoUrl: '',
+    compliancePolicyId: '',
+    seoKeywords: '',
   });
 
   const progress = useMemo(() => ((stepIndex + 1) / steps.length) * 100, [stepIndex]);
@@ -163,29 +265,66 @@ export default function ListingWizardPage() {
       return;
     }
 
+    if (!form.brand.trim()) {
+      setError('Add the brand so bass anglers can quickly assess fit for their tackle lineup.');
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
+      const payload = {
+        sellerId: form.sellerId,
+        title: form.title,
+        description: form.description,
+        price: Number(form.price),
+        currency: form.currency,
+        category: form.category || undefined,
+        tags: form.tags,
+        brand: form.brand.trim(),
+        modelName: form.modelName || undefined,
+        tackleCategory: form.tackleCategory || undefined,
+        condition: form.condition,
+        waterType: form.waterType || undefined,
+        lureStyle: form.lureStyle || undefined,
+        targetSpecies: parseCsv(form.targetSpecies || defaultTargetSpecies),
+        techniqueTags: parseCsv(form.techniqueTags),
+        seasonalUse: parseCsv(form.seasonalUse),
+        lineRatingLbMin: parseIntOrUndefined(form.lineRatingLbMin),
+        lineRatingLbMax: parseIntOrUndefined(form.lineRatingLbMax),
+        rodPower: form.rodPower || undefined,
+        rodAction: form.rodAction || undefined,
+        gearRatio: form.gearRatio || undefined,
+        bearingCount: parseIntOrUndefined(form.bearingCount),
+        maxDragLb: parseFloatOrUndefined(form.maxDragLb),
+        weightOz: parseFloatOrUndefined(form.weightOz),
+        lengthIn: parseFloatOrUndefined(form.lengthIn),
+        customNotes: form.customNotes || undefined,
+        autoAcceptOfferCents: parseIntOrUndefined(form.autoAcceptOfferCents),
+        minimumOfferCents: parseIntOrUndefined(form.minimumOfferCents),
+        shippingProfileId: form.shippingProfileId || undefined,
+        shippingWeightOz: parseFloatOrUndefined(form.shippingWeightOz),
+        shippingLengthIn: parseFloatOrUndefined(form.shippingLengthIn),
+        shippingWidthIn: parseFloatOrUndefined(form.shippingWidthIn),
+        shippingHeightIn: parseFloatOrUndefined(form.shippingHeightIn),
+        handlingTimeDays: parseIntOrUndefined(form.handlingTimeDays),
+        featuredPhotoUrl: form.featuredPhotoUrl || imageUrl,
+        compliancePolicyId: form.compliancePolicyId || undefined,
+        seoKeywords: parseCsv(form.seoKeywords),
+        publish: true,
+        images: [
+          {
+            url: imageUrl,
+            altText: form.title,
+            isPrimary: true,
+          },
+        ],
+      } as const;
+
       const response = await fetch('/api/listings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sellerId: form.sellerId,
-          title: form.title,
-          description: form.description,
-          price: Number(form.price),
-          currency: form.currency,
-          category: form.category || undefined,
-          tags: form.tags,
-          publish: true,
-          images: [
-            {
-              url: imageUrl,
-              altText: form.title,
-              isPrimary: true,
-            },
-          ],
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -396,6 +535,29 @@ export default function ListingWizardPage() {
                 className="rounded-md border border-brand-secondary/30 px-3 py-2"
                 type="number"
                 step="0.01"
+                min="0"
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              Brand
+              <input
+                value={form.brand}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, brand: event.target.value }))
+                }
+                className="rounded-md border border-brand-secondary/30 px-3 py-2"
+                placeholder="Megabass, Shimano, Daiwa"
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              Model name
+              <input
+                value={form.modelName}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, modelName: event.target.value }))
+                }
+                className="rounded-md border border-brand-secondary/30 px-3 py-2"
+                placeholder="Destroyer P5, Curado 150"
               />
             </label>
           </div>
@@ -427,6 +589,378 @@ export default function ListingWizardPage() {
               placeholder="swimbait, bass, 7ft-medium"
             />
           </label>
+          <div className="grid gap-4 md:grid-cols-3">
+            <label className="flex flex-col gap-1 text-sm">
+              Condition
+              <select
+                value={form.condition}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    condition: event.target.value as TackleCondition,
+                  }))
+                }
+                className="rounded-md border border-brand-secondary/30 px-3 py-2"
+              >
+                {tackleConditions.map((conditionOption) => (
+                  <option key={conditionOption} value={conditionOption}>
+                    {formatEnumLabel(conditionOption)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              Tackle category
+              <select
+                value={form.tackleCategory}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    tackleCategory: event.target.value as FormState['tackleCategory'],
+                  }))
+                }
+                className="rounded-md border border-brand-secondary/30 px-3 py-2"
+              >
+                <option value="">Select category</option>
+                {tackleCategories.map((categoryOption) => (
+                  <option key={categoryOption} value={categoryOption}>
+                    {formatEnumLabel(categoryOption)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              Water type
+              <select
+                value={form.waterType}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    waterType: event.target.value as FormState['waterType'],
+                  }))
+                }
+                className="rounded-md border border-brand-secondary/30 px-3 py-2"
+              >
+                <option value="">Any water</option>
+                {waterTypes.map((waterOption) => (
+                  <option key={waterOption} value={waterOption}>
+                    {formatEnumLabel(waterOption)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="flex flex-col gap-1 text-sm">
+              Lure style or technique focus
+              <input
+                value={form.lureStyle}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, lureStyle: event.target.value }))
+                }
+                className="rounded-md border border-brand-secondary/30 px-3 py-2"
+                placeholder="Topwater walker, flipping jig"
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              Target bass species
+              <input
+                value={form.targetSpecies}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, targetSpecies: event.target.value }))
+                }
+                className="rounded-md border border-brand-secondary/30 px-3 py-2"
+                placeholder="Largemouth Bass, Smallmouth Bass"
+              />
+            </label>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="flex flex-col gap-1 text-sm">
+              Technique tags (comma separated)
+              <input
+                value={form.techniqueTags}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, techniqueTags: event.target.value }))
+                }
+                className="rounded-md border border-brand-secondary/30 px-3 py-2"
+                placeholder="Flipping, Punching, Offshore"
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              Seasonal use (comma separated)
+              <input
+                value={form.seasonalUse}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, seasonalUse: event.target.value }))
+                }
+                className="rounded-md border border-brand-secondary/30 px-3 py-2"
+                placeholder="Spring, Summer"
+              />
+            </label>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            <label className="flex flex-col gap-1 text-sm">
+              Line rating minimum (lb)
+              <input
+                value={form.lineRatingLbMin}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, lineRatingLbMin: event.target.value }))
+                }
+                className="rounded-md border border-brand-secondary/30 px-3 py-2"
+                type="number"
+                min="0"
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              Line rating maximum (lb)
+              <input
+                value={form.lineRatingLbMax}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, lineRatingLbMax: event.target.value }))
+                }
+                className="rounded-md border border-brand-secondary/30 px-3 py-2"
+                type="number"
+                min="0"
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              Rod power
+              <input
+                value={form.rodPower}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, rodPower: event.target.value }))
+                }
+                className="rounded-md border border-brand-secondary/30 px-3 py-2"
+                placeholder="Medium Heavy"
+              />
+            </label>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            <label className="flex flex-col gap-1 text-sm">
+              Rod action
+              <input
+                value={form.rodAction}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, rodAction: event.target.value }))
+                }
+                className="rounded-md border border-brand-secondary/30 px-3 py-2"
+                placeholder="Fast"
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              Gear ratio
+              <input
+                value={form.gearRatio}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, gearRatio: event.target.value }))
+                }
+                className="rounded-md border border-brand-secondary/30 px-3 py-2"
+                placeholder="7.1:1"
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              Bearing count
+              <input
+                value={form.bearingCount}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, bearingCount: event.target.value }))
+                }
+                className="rounded-md border border-brand-secondary/30 px-3 py-2"
+                type="number"
+                min="0"
+              />
+            </label>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            <label className="flex flex-col gap-1 text-sm">
+              Max drag (lb)
+              <input
+                value={form.maxDragLb}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, maxDragLb: event.target.value }))
+                }
+                className="rounded-md border border-brand-secondary/30 px-3 py-2"
+                type="number"
+                min="0"
+                step="0.1"
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              Weight (oz)
+              <input
+                value={form.weightOz}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, weightOz: event.target.value }))
+                }
+                className="rounded-md border border-brand-secondary/30 px-3 py-2"
+                type="number"
+                min="0"
+                step="0.1"
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              Length (in)
+              <input
+                value={form.lengthIn}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, lengthIn: event.target.value }))
+                }
+                className="rounded-md border border-brand-secondary/30 px-3 py-2"
+                type="number"
+                min="0"
+                step="0.1"
+              />
+            </label>
+          </div>
+          <label className="flex flex-col gap-1 text-sm">
+            Custom notes (care, local success stories, accessibility info)
+            <textarea
+              value={form.customNotes}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, customNotes: event.target.value }))
+              }
+              rows={4}
+              className="rounded-md border border-brand-secondary/30 px-3 py-2"
+              placeholder="Great on grass edges with a slow roll retrieve."
+            />
+          </label>
+          <div className="grid gap-4 md:grid-cols-3">
+            <label className="flex flex-col gap-1 text-sm">
+              Auto-accept offer (cents)
+              <input
+                value={form.autoAcceptOfferCents}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, autoAcceptOfferCents: event.target.value }))
+                }
+                className="rounded-md border border-brand-secondary/30 px-3 py-2"
+                type="number"
+                min="0"
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              Minimum offer (cents)
+              <input
+                value={form.minimumOfferCents}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, minimumOfferCents: event.target.value }))
+                }
+                className="rounded-md border border-brand-secondary/30 px-3 py-2"
+                type="number"
+                min="0"
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              Handling time (days)
+              <input
+                value={form.handlingTimeDays}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, handlingTimeDays: event.target.value }))
+                }
+                className="rounded-md border border-brand-secondary/30 px-3 py-2"
+                type="number"
+                min="0"
+              />
+            </label>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            <label className="flex flex-col gap-1 text-sm">
+              Shipping weight (oz)
+              <input
+                value={form.shippingWeightOz}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, shippingWeightOz: event.target.value }))
+                }
+                className="rounded-md border border-brand-secondary/30 px-3 py-2"
+                type="number"
+                min="0"
+                step="0.1"
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              Shipping length (in)
+              <input
+                value={form.shippingLengthIn}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, shippingLengthIn: event.target.value }))
+                }
+                className="rounded-md border border-brand-secondary/30 px-3 py-2"
+                type="number"
+                min="0"
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              Shipping width (in)
+              <input
+                value={form.shippingWidthIn}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, shippingWidthIn: event.target.value }))
+                }
+                className="rounded-md border border-brand-secondary/30 px-3 py-2"
+                type="number"
+                min="0"
+              />
+            </label>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            <label className="flex flex-col gap-1 text-sm">
+              Shipping height (in)
+              <input
+                value={form.shippingHeightIn}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, shippingHeightIn: event.target.value }))
+                }
+                className="rounded-md border border-brand-secondary/30 px-3 py-2"
+                type="number"
+                min="0"
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              Shipping profile ID
+              <input
+                value={form.shippingProfileId}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, shippingProfileId: event.target.value }))
+                }
+                className="rounded-md border border-brand-secondary/30 px-3 py-2"
+                placeholder="Optional prebuilt profile"
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              Compliance policy ID
+              <input
+                value={form.compliancePolicyId}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, compliancePolicyId: event.target.value }))
+                }
+                className="rounded-md border border-brand-secondary/30 px-3 py-2"
+                placeholder="Optional policy tracking"
+              />
+            </label>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="flex flex-col gap-1 text-sm">
+              SEO keywords (comma separated)
+              <input
+                value={form.seoKeywords}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, seoKeywords: event.target.value }))
+                }
+                className="rounded-md border border-brand-secondary/30 px-3 py-2"
+                placeholder="bass tournament, frog rod, finesse"
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              Featured photo URL override
+              <input
+                value={form.featuredPhotoUrl}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, featuredPhotoUrl: event.target.value }))
+                }
+                className="rounded-md border border-brand-secondary/30 px-3 py-2"
+                placeholder="https://cdn.example.com/custom-hero.jpg"
+              />
+            </label>
+          </div>
           {imageUrl ? (
             <div className="flex justify-center">
               {/* eslint-disable-next-line @next/next/no-img-element */}
