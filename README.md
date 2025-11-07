@@ -24,6 +24,19 @@ Tackle Exchange is a reference marketplace built for buying and selling used fis
    pnpm --filter @possiblewebsite/db run prisma:seed
    ```
 
+   The seed loads 200+ curated listings spanning rods, reels, lures, lines, electronics, apparel, storage, and boat accessories. It also provisions offers, carts, orders across every status, payouts, shipments with tracking metadata, reviews, disputes, support threads, and help-center content sourced from `docs/help/`.
+
+   Demo credentials for QA:
+
+   | Role    | Email                                                                                                                                                                                             | Password       |
+   | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+   | Admin   | `admin@possible.tackle`                                                                                                                                                                           | `demoPass123!` |
+   | Support | `support@possible.tackle`                                                                                                                                                                         | `demoPass123!` |
+   | Sellers | `demo-seller@possible.tackle`, `smallbatch@possible.tackle`, `deckhand-supply@possible.tackle`, `heritage-rods@possible.tackle`, `bayou-tech@possible.tackle`, `northwoods@possible.tackle`       | `demoPass123!` |
+   | Buyers  | `verified-buyer@possible.tackle`, `boat-tour@possible.tackle`, `weekend-grass@possible.tackle`, `suspending-baits@possible.tackle`, `river-smallie@possible.tackle`, `salt-ready@possible.tackle` | `demoPass123!` |
+
+   Fixture assets that power listing media live in `apps/web/public/seed-images/`.
+
 4. Start the applications:
 
    ```bash

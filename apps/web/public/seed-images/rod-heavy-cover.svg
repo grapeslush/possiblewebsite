@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">
+  <rect width="320" height="200" fill="#0f172a"/>
+  <path d="M20 120 L300 80" stroke="#38bdf8" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="280" cy="76" r="18" fill="#1e293b" stroke="#38bdf8" stroke-width="4"/>
+  <text x="20" y="40" fill="#f8fafc" font-size="26" font-family="'Segoe UI',sans-serif">Heavy Cover Frog Rod</text>
+  <text x="20" y="170" fill="#94a3b8" font-size="18" font-family="'Segoe UI',sans-serif">Graphite blank • Braided line ready</text>
+</svg>
