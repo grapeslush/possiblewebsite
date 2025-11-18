@@ -15,8 +15,8 @@ Tackle Exchange is a reference marketplace built for buying and selling used fis
 
 ## Development quick start
 
-1. Install dependencies with `pnpm install`.
-2. Copy `.env.example` to `.env` (or export environment variables) and set `DATABASE_URL`, `REDIS_URL`, and provider keys for mail, storage, and hCaptcha.
+1. Install dependencies with `pnpm install`. Docker Desktop or the Docker Engine + Compose plugin is required for the containerized workflow.
+2. Copy `.env.example` to `.env` (or export environment variables) and set `DATABASE_URL`, `REDIS_URL`, `NEXTAUTH_SECRET`, and provider keys for mail, storage, and hCaptcha.
 3. Apply database migrations and seed demo inventory:
 
    ```bash
@@ -53,6 +53,13 @@ docker compose up --build
 ```
 
 The web UI is available at <http://localhost:3000>, the API at <http://localhost:4000>, MailHog at <http://localhost:8025>, and the MinIO Console at <http://localhost:9001>.
+
+The compose file reads from `.env` to keep service configuration in one place. The shipped `.env.example` contains sensible defaults for:
+
+- Port bindings for the web (`WEB_PORT`) and API (`API_PORT`) containers.
+- Required readiness variables (`DATABASE_URL`, `REDIS_URL`, `NEXTAUTH_SECRET`).
+- Object storage access against the bundled MinIO instance (`MINIO_*`, `OBJECT_STORAGE_*`).
+- Mail and hCaptcha credentials so email/human verification providers can be configured without editing the compose file.
 
 ## Observability
 
