@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AddressType } from '@prisma/client';
+import { AddressType } from '@possiblewebsite/db';
 import { z } from 'zod';
 
 import { prisma } from '../../../../lib/services';

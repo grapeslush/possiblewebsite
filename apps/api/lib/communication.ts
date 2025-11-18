@@ -1,4 +1,4 @@
-import { NotificationType } from '@prisma/client';
+import { NotificationType } from '@possiblewebsite/db';
 import { emailClient } from './email';
 import { auditLogs, notificationSettings, prisma } from './services';
 

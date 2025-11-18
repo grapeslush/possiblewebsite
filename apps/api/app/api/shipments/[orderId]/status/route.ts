@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { OrderRepository, prisma } from '@possiblewebsite/db';
-import { OrderEventType, ShipmentStatus } from '@prisma/client';
+import { OrderRepository, OrderEventType, ShipmentStatus, prisma } from '@possiblewebsite/db';
 import { releasePayoutForOrder } from '../../../../../lib/payouts';
 
 const repository = new OrderRepository(prisma);
@@ -12,16 +11,24 @@ const schema = z.object({
 });
 
 export async function POST(request: NextRequest, { params }: { params: { orderId: string } }) {
-  const payload = schema.safeParse(await request.json());
+  let payload: z.infer<typeof schema>;
 
-  if (!payload.success) {
-    return NextResponse.json({ error: payload.error.flatten() }, { status: 400 });
+  try {
+    payload = schema.parse(await request.json());
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: error.flatten() }, { status: 400 });
+    }
+
+    throw error;
   }
 
   const orderId = params.orderId;
-  const status = payload.data.status;
+  const status = payload.status;
+  const trackingNumber =
+    typeof payload.trackingNumber === 'string' ? payload.trackingNumber : undefined;
 
-  await repository.updateShipmentStatus(orderId, status, payload.data.trackingNumber);
+  await repository.updateShipmentStatus(orderId, status, trackingNumber);
   await repository.addTimelineEvent(orderId, OrderEventType.NOTE, `Shipment marked as ${status}`);
 
   if (status === ShipmentStatus.DELIVERED) {

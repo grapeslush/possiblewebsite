@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 
-import { ShipmentTrackingStatus } from '@prisma/client';
+import { ShipmentTrackingStatus } from '@possiblewebsite/db';
 
 import type {
   AddressPayload,

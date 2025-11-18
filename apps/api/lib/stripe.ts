@@ -107,16 +107,18 @@ export const createCheckoutSession = async (options: CreateCheckoutSessionOption
   const breakdown = calculateFinancialBreakdown(total, options);
   const paymentRepository = new PaymentRepository(prisma);
 
-  const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = order.items.map((item) => ({
-    quantity: item.quantity,
-    price_data: {
-      currency: order.currency?.toLowerCase() ?? 'usd',
-      product_data: {
-        name: `Listing ${item.listingId}`,
+  const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = order.items.map(
+    (item: (typeof order.items)[number]) => ({
+      quantity: item.quantity,
+      price_data: {
+        currency: order.currency?.toLowerCase() ?? 'usd',
+        product_data: {
+          name: `Listing ${item.listingId}`,
+        },
+        unit_amount: Math.round(Number(item.unitPrice) * 100),
       },
-      unit_amount: Math.round(Number(item.unitPrice) * 100),
-    },
-  }));
+    }),
+  );
 
   const session = await stripe.checkout.sessions.create({
     mode: 'payment',
