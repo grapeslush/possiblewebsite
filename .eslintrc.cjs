@@ -14,6 +14,11 @@ module.exports = {
       extends: ['./packages/config/eslint/node.cjs'],
     },
     {
+      files: ['*.js'],
+      excludedFiles: ['*.cjs'],
+      extends: ['./packages/config/eslint/node.cjs'],
+    },
+    {
       files: ['tests/**/*.js'],
       extends: ['./packages/config/eslint/node.cjs'],
     },
