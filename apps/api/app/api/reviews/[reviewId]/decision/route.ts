@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ReviewStatus } from '@prisma/client';
+import { ReviewStatus } from '@possiblewebsite/db';
 import { z } from 'zod';
 import { emailClient } from '../../../../../lib/email';
 import { auditLogs, prisma, reviews } from '../../../../../lib/services';
@@ -14,44 +14,55 @@ const decisionSchema = z.object({
   reason: z.string().optional(),
 });
 
+type DecisionInput = z.infer<typeof decisionSchema>;
+
 export async function POST(request: NextRequest, { params }: { params: { reviewId: string } }) {
   const body = await request.json();
-  const parsed = decisionSchema.safeParse(body);
+  let parsed: DecisionInput;
 
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+  try {
+    parsed = decisionSchema.parse(body);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: error.flatten() }, { status: 400 });
+    }
+
+    throw error;
   }
+  const { moderatorId, status, reason } = parsed;
+  const moderatorIdValue = typeof moderatorId === 'string' ? moderatorId : null;
+  const reasonValue = typeof reason === 'string' ? reason : null;
+  const statusValue = status as ReviewStatus;
 
   const review = await reviews.recordDecision({
     reviewId: params.reviewId,
-    moderatorId: parsed.data.moderatorId,
-    status: parsed.data.status,
-    reason: parsed.data.reason,
+    moderatorId: moderatorIdValue,
+    status: statusValue,
+    reason: reasonValue,
   });
 
   await prisma.moderationEvent.create({
     data: {
       type: 'REVIEW',
       entityId: review.id,
-      actorId: parsed.data.moderatorId ?? null,
-      action: parsed.data.status === ReviewStatus.APPROVED ? 'approved' : 'rejected',
-      metadata: parsed.data.reason ? { reason: parsed.data.reason } : undefined,
+      actorId: moderatorIdValue,
+      action: statusValue === ReviewStatus.APPROVED ? 'approved' : 'rejected',
+      metadata: reasonValue ? { reason: reasonValue } : undefined,
     },
   });
 
   await auditLogs.createLog({
-    actorId: parsed.data.moderatorId ?? undefined,
+    actorId: moderatorIdValue ?? undefined,
     entity: 'review',
     entityId: review.id,
-    action: `moderation.${parsed.data.status.toLowerCase()}`,
-    metadata: parsed.data.reason ? { reason: parsed.data.reason } : undefined,
+    action: `moderation.${statusValue.toLowerCase()}`,
+    metadata: reasonValue ? { reason: reasonValue } : undefined,
   });
 
   const fullReview = await reviews.getReviewById(review.id);
 
   if (fullReview) {
-    const template =
-      parsed.data.status === ReviewStatus.APPROVED ? 'review-approved' : 'review-rejected';
+    const template = statusValue === ReviewStatus.APPROVED ? 'review-approved' : 'review-rejected';
     const email = fullReview.author.email ?? undefined;
 
     if (email) {
@@ -62,7 +73,7 @@ export async function POST(request: NextRequest, { params }: { params: { reviewI
           reviewerName: fullReview.author.displayName,
           subjectName: fullReview.targetUser.displayName,
           reviewBody: fullReview.body,
-          reason: parsed.data.reason,
+          reason: reasonValue,
         },
       });
     }

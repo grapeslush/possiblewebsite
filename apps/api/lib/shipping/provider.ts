@@ -1,4 +1,4 @@
-import { ShipmentTrackingStatus } from '@prisma/client';
+import { ShipmentTrackingStatus } from '@possiblewebsite/db';
 
 export interface AddressPayload {
   name?: string;

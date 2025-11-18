@@ -1,4 +1,4 @@
-import postmark from 'postmark';
+import * as postmark from 'postmark';
 import sgMail from '@sendgrid/mail';
 
 type TemplateKey = 'order-message' | 'dispute-message' | 'review-approved' | 'review-rejected';

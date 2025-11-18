@@ -5,10 +5,10 @@ import {
   OrderEventType,
   ShipmentStatus,
   ShipmentTrackingStatus,
-} from '@prisma/client';
+  prisma,
+  OrderRepository,
+} from '@possiblewebsite/db';
 import { z } from 'zod';
-
-import { OrderRepository, prisma } from '@possiblewebsite/db';
 
 import { uploadBinary } from '../../../../lib/storage';
 import { enqueueShipmentTrackingPoll } from '../../../../lib/queues';

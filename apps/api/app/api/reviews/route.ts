@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ReviewStatus } from '@prisma/client';
+import { ReviewStatus } from '@possiblewebsite/db';
 import { z } from 'zod';
 
 import { instrumentRoute, incrementMetric, logger } from '../../../lib/observability';
