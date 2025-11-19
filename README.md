@@ -46,20 +46,17 @@ Tackle Exchange is a reference marketplace built for buying and selling used fis
 
 ### Docker-based workflow
 
-Use the provided compose stack to bring up the entire platform—web, API, PostgreSQL, Redis, MailHog, and MinIO—with one command:
+Use the provided compose stack to bring up the app container. Optional profiles can also start PostgreSQL, Redis, MailHog, and MinIO if you don't want to point at external services:
 
 ```bash
-docker compose up --build
+docker compose up --build                       # app only
+docker compose --profile postgres --profile redis up --build  # add DB/cache
+docker compose --profile minio --profile mailhog up --build   # add storage/mail
 ```
 
 The web UI is available at <http://localhost:3000>, the API at <http://localhost:4000>, MailHog at <http://localhost:8025>, and the MinIO Console at <http://localhost:9001>.
 
-The compose file reads from `.env` to keep service configuration in one place. The shipped `.env.example` contains sensible defaults for:
-
-- Port bindings for the web (`WEB_PORT`) and API (`API_PORT`) containers.
-- Required readiness variables (`DATABASE_URL`, `REDIS_URL`, `NEXTAUTH_SECRET`).
-- Object storage access against the bundled MinIO instance (`MINIO_*`, `OBJECT_STORAGE_*`).
-- Mail and hCaptcha credentials so email/human verification providers can be configured without editing the compose file.
+On first launch the app redirects to `/setup`, where you can enter database/cache, storage, mail, and admin credentials through the browser. Configuration is written to `/app/.env` inside the container; bind-mount a host path to that file if you want it to persist across rebuilds. The `.env.example` is still available for pre-seeding values when automating deployments or overriding the wizard defaults, but manual editing is no longer required for local trials.
 
 ## Observability
 
