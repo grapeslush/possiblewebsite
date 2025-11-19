@@ -5,8 +5,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    env_file:
-      - .env
     environment:
       NODE_ENV: production
       PORT: ${WEB_PORT:-3000}
