@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getCsrfHeaderName } from '@/lib/auth/csrf';
 
 export default function SecurityForm() {
+  const [csrfHeaderName, setCsrfHeaderName] = useState('');
   const [csrfToken, setCsrfToken] = useState('');
   const [deviceId, setDeviceId] = useState<string | null>(null);
   const [otpauthUrl, setOtpauthUrl] = useState<string | null>(null);
@@ -15,6 +15,7 @@ export default function SecurityForm() {
       const response = await fetch('/api/auth/csrf');
       if (!response.ok) return;
       const data = await response.json();
+      setCsrfHeaderName(data.headerName);
       setCsrfToken(data.csrfToken);
     };
 
@@ -27,7 +28,7 @@ export default function SecurityForm() {
 
     const response = await fetch('/api/auth/mfa/setup', {
       method: 'POST',
-      headers: { [getCsrfHeaderName()]: csrfToken }
+      headers: csrfHeaderName && csrfToken ? { [csrfHeaderName]: csrfToken } : undefined,
     });
 
     if (!response.ok) {
@@ -56,9 +57,9 @@ export default function SecurityForm() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        [getCsrfHeaderName()]: csrfToken
+        ...(csrfHeaderName && csrfToken ? { [csrfHeaderName]: csrfToken } : {}),
       },
-      body: JSON.stringify({ deviceId, token })
+      body: JSON.stringify({ deviceId, token }),
     });
 
     if (!response.ok) {
@@ -95,7 +96,12 @@ export default function SecurityForm() {
       <form className="space-y-4" onSubmit={verifyEnrollment}>
         <div>
           <label className="block text-sm font-medium">Authenticator code</label>
-          <input className="mt-1 w-full rounded border px-3 py-2" name="token" required placeholder="123456" />
+          <input
+            className="mt-1 w-full rounded border px-3 py-2"
+            name="token"
+            required
+            placeholder="123456"
+          />
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
         {message && <p className="text-sm text-green-600">{message}</p>}

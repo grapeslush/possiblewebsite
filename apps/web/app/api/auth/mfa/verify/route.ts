@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma, AuthService } from '@possiblewebsite/db';
 import { getServerAuthSession } from '@/lib/auth';
-import { verifyCsrfToken, getCsrfHeaderName } from '@/lib/auth/csrf';
+import { verifyCsrfToken } from '@/lib/auth/csrf.server';
+import { getCsrfHeaderName } from '@/lib/auth/csrf';
 
 const authService = new AuthService(prisma);
 
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
   }
 
   const device = await prisma.totpDevice.findFirst({
-    where: { id: deviceId, userId: session.user.id }
+    where: { id: deviceId, userId: session.user.id },
   });
 
   if (!device) {
