@@ -201,8 +201,9 @@ export async function getSetupStatus() {
 
       if (Array.isArray(migrationRows) && migrationRows.length > 0) {
         migrationsApplied = true;
-        latestMigration = migrationRows[0].finished_at
-          ? new Date(migrationRows[0].finished_at).toISOString()
+        const latestMigrationRow = migrationRows[0]!;
+        latestMigration = latestMigrationRow.finished_at
+          ? new Date(latestMigrationRow.finished_at).toISOString()
           : null;
       }
     } catch (migrationError) {

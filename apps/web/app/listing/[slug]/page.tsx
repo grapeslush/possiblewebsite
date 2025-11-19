@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: ListingPageProps): Promise<Me
   const listing = await repository.getListingBySlug(params.slug);
   if (!listing) {
     return {
-      title: 'Listing unavailable'
+      title: 'Listing unavailable',
     };
   }
 
@@ -28,8 +28,8 @@ export async function generateMetadata({ params }: ListingPageProps): Promise<Me
     openGraph: {
       title: listing.title,
       description: listing.description,
-      images: listing.images.map((image) => ({ url: image.url }))
-    }
+      images: listing.images.map((image) => ({ url: image.url })),
+    },
   };
 }
 
@@ -50,8 +50,8 @@ export default async function ListingDetailPage({ params }: ListingPageProps) {
     buyer: {
       id: offer.buyer.id,
       displayName: offer.buyer.displayName,
-      avatarUrl: offer.buyer.avatarUrl
-    }
+      avatarUrl: offer.buyer.avatarUrl,
+    },
   }));
 
   const targetSpecies = listing.targetSpecies?.length ? listing.targetSpecies.join(', ') : null;
@@ -67,17 +67,15 @@ export default async function ListingDetailPage({ params }: ListingPageProps) {
           : null;
   const formattedWeight = listing.weightOz ? `${Number(listing.weightOz).toFixed(1)} oz` : null;
   const formattedLength = listing.lengthIn ? `${Number(listing.lengthIn).toFixed(1)} in` : null;
-  const formattedMaxDrag = listing.maxDragLb
-    ? `${Number(listing.maxDragLb).toFixed(1)} lb`
-    : null;
+  const formattedMaxDrag = listing.maxDragLb ? `${Number(listing.maxDragLb).toFixed(1)} lb` : null;
   const formattedShippingWeight = listing.shippingWeightOz
     ? `${Number(listing.shippingWeightOz).toFixed(1)} oz`
     : null;
   const shippingDimensions =
     listing.shippingLengthIn && listing.shippingWidthIn && listing.shippingHeightIn
-      ? `${Number(listing.shippingLengthIn).toFixed(1)}" L × ${Number(listing.shippingWidthIn).toFixed(
-          1,
-        )}" W × ${Number(listing.shippingHeightIn).toFixed(1)}" H`
+      ? `${Number(listing.shippingLengthIn).toFixed(1)}" L × ${Number(
+          listing.shippingWidthIn,
+        ).toFixed(1)}" W × ${Number(listing.shippingHeightIn).toFixed(1)}" H`
       : null;
 
   return (
@@ -92,10 +90,15 @@ export default async function ListingDetailPage({ params }: ListingPageProps) {
           <Gallery images={listing.images} title={listing.title} />
           <div className="rounded-lg border bg-white p-6 shadow-sm">
             <h1 className="text-3xl font-semibold text-brand-secondary">{listing.title}</h1>
-            <p className="mt-3 text-sm text-muted-foreground whitespace-pre-line">{listing.description}</p>
+            <p className="mt-3 text-sm text-muted-foreground whitespace-pre-line">
+              {listing.description}
+            </p>
             <div className="mt-4 flex flex-wrap gap-2">
               {listing.tags?.map((tag) => (
-                <span key={tag} className="rounded-full bg-brand-primary/10 px-3 py-1 text-xs text-brand-primary">
+                <span
+                  key={tag}
+                  className="rounded-full bg-brand-primary/10 px-3 py-1 text-xs text-brand-primary"
+                >
                   {tag}
                 </span>
               ))}
@@ -168,7 +171,10 @@ export default async function ListingDetailPage({ params }: ListingPageProps) {
                 }
               />
               <MetadataRow label="Ship-from" value={listing.shippingProfile?.shipFromCity} />
-              <MetadataRow label="Carrier preference" value={listing.shippingProfile?.courierPreference} />
+              <MetadataRow
+                label="Carrier preference"
+                value={listing.shippingProfile?.courierPreference}
+              />
               <MetadataRow label="Service level" value={listing.shippingProfile?.serviceLevel} />
               <MetadataRow label="Packed weight" value={formattedShippingWeight} />
               <MetadataRow label="Package size" value={shippingDimensions} />
@@ -188,7 +194,9 @@ export default async function ListingDetailPage({ params }: ListingPageProps) {
             <header className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Sold by</p>
-                <p className="text-lg font-semibold text-brand-secondary">{listing.seller.displayName}</p>
+                <p className="text-lg font-semibold text-brand-secondary">
+                  {listing.seller.displayName}
+                </p>
               </div>
               {listing.seller.avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -200,7 +208,8 @@ export default async function ListingDetailPage({ params }: ListingPageProps) {
               ) : null}
             </header>
             <p className="mt-3 text-sm text-muted-foreground">
-              Seasoned seller with responsive communication and a track record of well-packaged shipments.
+              Seasoned seller with responsive communication and a track record of well-packaged
+              shipments.
             </p>
             <div className="mt-4 flex items-center justify-between text-sm text-brand-secondary">
               <span>{reviewSummary.averageRating.toFixed(1)} ★ rating</span>
@@ -221,7 +230,13 @@ export default async function ListingDetailPage({ params }: ListingPageProps) {
   );
 }
 
-function Gallery({ images, title }: { images: { id: string; url: string; altText: string | null }[]; title: string }) {
+function Gallery({
+  images,
+  title,
+}: {
+  images: { id: string; url: string; altText: string | null }[];
+  title: string;
+}) {
   if (images.length === 0) {
     return (
       <div className="rounded-lg border border-dashed border-brand-secondary/30 bg-muted/30 p-20 text-center text-sm text-muted-foreground">
@@ -231,6 +246,9 @@ function Gallery({ images, title }: { images: { id: string; url: string; altText
   }
 
   const [primary, ...rest] = images;
+  if (!primary) {
+    return null;
+  }
 
   return (
     <div className="space-y-3">
@@ -288,7 +306,7 @@ function buildReviewSummary(listing: Awaited<ReturnType<ListingRepository['getLi
   const highlights = [
     'Fast responses and transparent pricing.',
     'Items arrive safely with thoughtful packaging.',
-    'Repeat buyers praise the condition of products.'
+    'Repeat buyers praise the condition of products.',
   ];
 
   return { totalReviews, averageRating, highlights };

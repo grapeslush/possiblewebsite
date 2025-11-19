@@ -8,12 +8,16 @@ export const runtime = 'nodejs';
 export async function GET() {
   const checks: Record<string, { status: 'pass' | 'fail'; detail?: string }> = {};
 
-  try {
-    await prisma.$queryRaw`SELECT 1`;
-    checks.database = { status: 'pass' };
-  } catch (error) {
-    logger.error({ err: error }, 'web database connectivity failed');
-    checks.database = { status: 'fail', detail: (error as Error).message };
+  if (!process.env.DATABASE_URL) {
+    checks.database = { status: 'fail', detail: 'DATABASE_URL not configured' };
+  } else {
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+      checks.database = { status: 'pass' };
+    } catch (error) {
+      logger.error({ err: error }, 'web database connectivity failed');
+      checks.database = { status: 'fail', detail: (error as Error).message };
+    }
   }
 
   checks.metrics = {

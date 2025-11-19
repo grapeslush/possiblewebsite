@@ -33,6 +33,10 @@ interface SellerTableProps<T extends SellerTableRow> {
 
 const parseCsv = (value: string) => {
   const [headerLine, ...lines] = value.trim().split(/\r?\n/);
+  if (!headerLine) {
+    return [];
+  }
+
   const headers = headerLine.split(',').map((h) => h.trim());
 
   return lines

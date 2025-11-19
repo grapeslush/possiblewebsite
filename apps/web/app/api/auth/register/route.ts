@@ -3,7 +3,8 @@ import { prisma, AuthService } from '@possiblewebsite/db';
 import { hash } from 'bcryptjs';
 import { getRequiredPolicies } from '@/lib/auth/policies';
 import { sendVerificationEmail } from '@/lib/email';
-import { createCsrfToken, getCsrfHeaderName, verifyCsrfToken } from '@/lib/auth/csrf';
+import { getCsrfHeaderName } from '@/lib/auth/csrf';
+import { createCsrfToken, verifyCsrfToken } from '@/lib/auth/csrf.server';
 import { stripe } from '@/lib/stripe';
 
 const authService = new AuthService(prisma);
@@ -16,7 +17,14 @@ const formatPolicyTitle = (slug: string) =>
 
 const validateBody = (body: any) => {
   if (!body) return { error: 'Missing body' };
-  const { email, password, displayName, dateOfBirth, marketingOptIn = false, acceptPolicies } = body;
+  const {
+    email,
+    password,
+    displayName,
+    dateOfBirth,
+    marketingOptIn = false,
+    acceptPolicies,
+  } = body;
 
   if (typeof email !== 'string' || !email.includes('@')) {
     return { error: 'Invalid email' };
@@ -49,7 +57,7 @@ const validateBody = (body: any) => {
     displayName,
     dateOfBirth: parsedDate,
     marketingOptIn: Boolean(marketingOptIn),
-    acceptPolicies: acceptPolicies as { policy: string; version: string }[]
+    acceptPolicies: acceptPolicies as { policy: string; version: string }[],
   };
 };
 
@@ -71,14 +79,17 @@ export async function POST(request: Request) {
   }
 
   const requiredPolicies = getRequiredPolicies();
-  const missingPolicy = requiredPolicies.find((policy) =>
-    !result.acceptPolicies.some((accepted) => accepted.policy === policy.policy && accepted.version === policy.version)
+  const missingPolicy = requiredPolicies.find(
+    (policy) =>
+      !result.acceptPolicies.some(
+        (accepted) => accepted.policy === policy.policy && accepted.version === policy.version,
+      ),
   );
 
   if (missingPolicy) {
     return NextResponse.json(
       { error: `Missing acceptance for ${formatPolicyTitle(missingPolicy.policy)}` },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -92,8 +103,8 @@ export async function POST(request: Request) {
         displayName: result.displayName,
         dateOfBirth: result.dateOfBirth,
         ageVerifiedAt: new Date(),
-        marketingOptIn: result.marketingOptIn
-      }
+        marketingOptIn: result.marketingOptIn,
+      },
     });
 
     await Promise.all(
@@ -105,7 +116,7 @@ export async function POST(request: Request) {
             title,
             version: policy.version,
             isActive: true,
-            publishedAt: new Date()
+            publishedAt: new Date(),
           },
           create: {
             id: policy.policy,
@@ -119,23 +130,23 @@ export async function POST(request: Request) {
             isRequiredForBuyers: true,
             isRequiredForSellers: true,
             isActive: true,
-            publishedAt: new Date()
-          }
+            publishedAt: new Date(),
+          },
         });
 
         await authService.recordPolicyAcceptance(user.id, record.id, record.version, null);
-      })
+      }),
     );
 
     if (stripe) {
       const customer = await stripe.customers.create({
         email: user.email,
-        name: user.displayName
+        name: user.displayName,
       });
 
       await prisma.user.update({
         where: { id: user.id },
-        data: { stripeCustomerId: customer.id }
+        data: { stripeCustomerId: customer.id },
       });
     }
 

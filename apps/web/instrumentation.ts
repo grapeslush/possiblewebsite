@@ -12,8 +12,9 @@ const parseEnvFile = (content: string): Record<string, string> => {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith('#')) continue;
 
-    const [key, ...rest] = trimmed.split('=');
-    entries[key] = rest.join('=').replace(/^"|"$/g, '');
+    const [rawKey, ...rest] = trimmed.split('=');
+    if (!rawKey) continue;
+    entries[rawKey] = rest.join('=').replace(/^"|"$/g, '');
   }
 
   return entries;

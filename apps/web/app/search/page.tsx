@@ -41,8 +41,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const maxPrice = parseNumber(searchParams.maxPrice);
 
   const listings = await repository.searchListings({
-    term,
-    category,
+    term: term ?? undefined,
+    category: category ?? undefined,
     minPrice: minPrice ?? undefined,
     maxPrice: maxPrice ?? undefined,
     limit: 30,
@@ -178,9 +178,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   );
 }
 
-function extractParam(param: string | string[] | undefined) {
+function extractParam(param: string | string[] | undefined): string | null {
   if (Array.isArray(param)) {
-    return param[0];
+    return param[0] ?? null;
   }
   return param ?? null;
 }

@@ -348,7 +348,7 @@ async function seedListings(
 
   for (const [catalogIndex, product] of catalog.entries()) {
     for (const variant of variants) {
-      const seller = sellers[(catalogIndex + listings.length) % sellers.length];
+      const seller = sellers[(catalogIndex + listings.length) % sellers.length]!;
       const slug = slugify(`${product.baseTitle}${variant.suffix}`, counter);
       counter += 1;
 
@@ -445,7 +445,7 @@ async function seedListings(
 
   const heroListingSeller =
     sellers.find((seller) => seller.user.id === '11111111-1111-1111-1111-111111111111') ??
-    sellers[0];
+    sellers[0]!;
 
   await prisma.listing.updateMany({
     where: { sellerId: heroListingSeller.user.id, status: ListingStatus.DRAFT },
@@ -561,28 +561,28 @@ async function seedMarketplaceActivity(
     {
       status: OfferStatus.PENDING,
       listing: listingA,
-      buyer: buyers[0],
+      buyer: buyers[0]!,
       amount: listingA.listing.price.mul(new Prisma.Decimal(0.94)),
       message: 'Checking if you can include the original box? I can checkout today.',
     },
     {
       status: OfferStatus.ACCEPTED,
       listing: listingB,
-      buyer: buyers[1],
+      buyer: buyers[1]!,
       amount: listingB.listing.price.mul(new Prisma.Decimal(0.97)),
       message: 'Ready to buy if you can ship by tomorrow.',
     },
     {
       status: OfferStatus.DECLINED,
       listing: listingC,
-      buyer: buyers[2],
+      buyer: buyers[2]!,
       amount: listingC.listing.price.mul(new Prisma.Decimal(0.82)),
       message: 'Can you do a quick discount for bundle pricing?',
     },
     {
       status: OfferStatus.COUNTERED,
       listing: listingD,
-      buyer: buyers[3],
+      buyer: buyers[3]!,
       amount: listingD.listing.price.mul(new Prisma.Decimal(0.88)),
       counterAmount: listingD.listing.price.mul(new Prisma.Decimal(0.93)),
       message: 'Countering at 7% under asking to cover tournament shipping.',
@@ -590,14 +590,14 @@ async function seedMarketplaceActivity(
     {
       status: OfferStatus.WITHDRAWN,
       listing: listingE,
-      buyer: buyers[4],
+      buyer: buyers[4]!,
       amount: listingE.listing.price.mul(new Prisma.Decimal(0.9)),
       message: 'Withdrawing due to double booking. Will revisit after event.',
     },
     {
       status: OfferStatus.EXPIRED,
       listing: listingF,
-      buyer: buyers[5],
+      buyer: buyers[5]!,
       amount: listingF.listing.price.mul(new Prisma.Decimal(0.9)),
       message: 'Offer expired before seller responded.',
     },
@@ -628,8 +628,8 @@ async function seedMarketplaceActivity(
   const orderScenarios = [
     {
       listingEntry: listingA,
-      offer: createdOffers[0],
-      buyer: buyers[0],
+      offer: createdOffers[0]!,
+      buyer: buyers[0]!,
       status: OrderStatus.PENDING,
       shipmentStatus: ShipmentStatus.PREPARING,
       trackingStatus: ShipmentTrackingStatus.LABEL_PURCHASED,
@@ -640,8 +640,8 @@ async function seedMarketplaceActivity(
     },
     {
       listingEntry: listingB,
-      offer: createdOffers[1],
-      buyer: buyers[1],
+      offer: createdOffers[1]!,
+      buyer: buyers[1]!,
       status: OrderStatus.CONFIRMED,
       shipmentStatus: ShipmentStatus.SHIPPED,
       trackingStatus: ShipmentTrackingStatus.IN_TRANSIT,
@@ -652,8 +652,8 @@ async function seedMarketplaceActivity(
     },
     {
       listingEntry: listingC,
-      offer: createdOffers[2],
-      buyer: buyers[2],
+      offer: createdOffers[2]!,
+      buyer: buyers[2]!,
       status: OrderStatus.FULFILLED,
       shipmentStatus: ShipmentStatus.DELIVERED,
       trackingStatus: ShipmentTrackingStatus.DELIVERED,
@@ -664,8 +664,8 @@ async function seedMarketplaceActivity(
     },
     {
       listingEntry: listingD,
-      offer: createdOffers[3],
-      buyer: buyers[3],
+      offer: createdOffers[3]!,
+      buyer: buyers[3]!,
       status: OrderStatus.CANCELLED,
       shipmentStatus: null,
       trackingStatus: null,
@@ -676,8 +676,8 @@ async function seedMarketplaceActivity(
     },
     {
       listingEntry: listingE,
-      offer: createdOffers[4],
-      buyer: buyers[4],
+      offer: createdOffers[4]!,
+      buyer: buyers[4]!,
       status: OrderStatus.REFUNDED,
       shipmentStatus: ShipmentStatus.RETURNED,
       trackingStatus: ShipmentTrackingStatus.EXCEPTION,
@@ -688,8 +688,8 @@ async function seedMarketplaceActivity(
     },
     {
       listingEntry: listingF,
-      offer: createdOffers[5],
-      buyer: buyers[5],
+      offer: createdOffers[5]!,
+      buyer: buyers[5]!,
       status: OrderStatus.DISPUTED,
       shipmentStatus: ShipmentStatus.DELIVERED,
       trackingStatus: ShipmentTrackingStatus.EXCEPTION,
@@ -1006,6 +1006,14 @@ async function seedMarketplaceActivity(
     }
   }
 
+  if (buyers.length < 2) {
+    throw new Error('Not enough buyers to seed carts and recommendations');
+  }
+
+  const primaryBuyer = buyers[0]!;
+  const secondaryBuyer = buyers[1] ?? primaryBuyer;
+  const featuredListing = activeListings[9] ?? activeListings[0]!;
+
   const cartOneItems = activeListings.slice(6, 9).map((entry) => ({
     listingId: entry.listing.id,
     unitPrice: entry.listing.price,
@@ -1013,7 +1021,7 @@ async function seedMarketplaceActivity(
 
   await prisma.cart.create({
     data: {
-      buyerId: buyers[0]?.id ?? buyers[0].id,
+      buyerId: primaryBuyer.id,
       active: true,
       items: {
         create: cartOneItems.map((item) => ({
@@ -1027,14 +1035,14 @@ async function seedMarketplaceActivity(
 
   await prisma.cart.create({
     data: {
-      buyerId: buyers[1]?.id ?? buyers[0].id,
+      buyerId: secondaryBuyer.id,
       active: false,
       items: {
         create: [
           {
-            listingId: activeListings[9]?.listing.id ?? activeListings[0].listing.id,
+            listingId: featuredListing.listing.id,
             quantity: 1,
-            unitPrice: activeListings[9]?.listing.price ?? activeListings[0].listing.price,
+            unitPrice: featuredListing.listing.price,
           },
         ],
       },
@@ -1044,7 +1052,7 @@ async function seedMarketplaceActivity(
   await prisma.recommendationCache.createMany({
     data: [
       {
-        userId: buyers[0].id,
+        userId: primaryBuyer.id,
         context: 'dashboard-feed',
         recommendations: {
           message: 'AI surfaced frog combos with similar provenance tags.',

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { type ComponentPropsWithoutRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
@@ -48,7 +48,12 @@ export function MarkdownContent({ children }: { children: string }) {
           <th className="bg-brand-secondary/10 px-3 py-2 text-left font-semibold" {...props} />
         ),
         td: (props) => <td className="px-3 py-2" {...props} />,
-        code: ({ inline, className, children, ...props }) => (
+        code: ({
+          inline,
+          className,
+          children,
+          ...props
+        }: ComponentPropsWithoutRef<'code'> & { inline?: boolean }) => (
           <code
             className={`rounded bg-neutral-100 px-1 py-0.5 text-sm font-mono ${inline ? 'align-baseline' : 'block'} ${className ?? ''}`.trim()}
             {...props}

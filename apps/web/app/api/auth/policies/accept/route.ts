@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma, AuthService } from '@possiblewebsite/db';
 import { getServerAuthSession } from '@/lib/auth';
-import { verifyCsrfToken, getCsrfHeaderName } from '@/lib/auth/csrf';
+import { getCsrfHeaderName } from '@/lib/auth/csrf';
+import { verifyCsrfToken } from '@/lib/auth/csrf.server';
 
 const authService = new AuthService(prisma);
 
@@ -36,7 +37,7 @@ export async function POST(request: Request) {
       title,
       version,
       isActive: true,
-      publishedAt: new Date()
+      publishedAt: new Date(),
     },
     create: {
       id: policy,
@@ -50,11 +51,16 @@ export async function POST(request: Request) {
       isRequiredForBuyers: true,
       isRequiredForSellers: true,
       isActive: true,
-      publishedAt: new Date()
-    }
+      publishedAt: new Date(),
+    },
   });
 
-  await authService.recordPolicyAcceptance(session.user.id, policyRecord.id, policyRecord.version, null);
+  await authService.recordPolicyAcceptance(
+    session.user.id,
+    policyRecord.id,
+    policyRecord.version,
+    null,
+  );
 
   return NextResponse.json({ success: true });
 }

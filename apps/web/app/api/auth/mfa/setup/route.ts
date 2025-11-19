@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma, AuthService } from '@possiblewebsite/db';
 import { getServerAuthSession } from '@/lib/auth';
-import { verifyCsrfToken, getCsrfHeaderName } from '@/lib/auth/csrf';
+import { getCsrfHeaderName } from '@/lib/auth/csrf';
+import { verifyCsrfToken } from '@/lib/auth/csrf.server';
 
 const authService = new AuthService(prisma);
 
