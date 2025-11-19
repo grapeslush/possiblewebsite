@@ -13,6 +13,7 @@
     "app/**/*.ts",
     "app/**/*.tsx",
     "lib/**/*.ts",
+    "scripts/**/*.ts",
     "__tests__/**/*.ts",
     "*.ts",
     ".next/types/**/*.ts"

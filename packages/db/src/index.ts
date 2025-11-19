@@ -37,6 +37,7 @@ export { NotificationSettingRepository } from './repositories/notification-setti
 export { ReviewRepository } from './repositories/review.repository';
 export { MarketplaceService } from './services/marketplace.service';
 export { AuthService } from './services/auth.service';
+export { PlatformSettingRepository } from './repositories/platform-setting.repository';
 export type { CreateUserInput } from './repositories/user.repository';
 export type {
   CreateListingInput,

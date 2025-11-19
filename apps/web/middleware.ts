@@ -3,6 +3,14 @@ import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
 const PUBLIC_PATHS = [/^\/api\/auth\//, /^\/auth\//, /^\/$/];
+const SETUP_ALLOWED_PATHS = [
+  /^\/setup(\/.*)?$/,
+  /^\/api\/setup\//,
+  /^\/_next\//,
+  /^\/favicon\.ico$/,
+  /^\/robots\.txt$/,
+  /^\/sitemap\.xml$/,
+];
 
 const ROLE_RULES: { pattern: RegExp; roles: string[] }[] = [
   { pattern: /^\/api\/admin\//, roles: ['ADMIN'] },
@@ -22,6 +30,13 @@ const requiresAuth = (pathname: string) => {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  const onboardingComplete = process.env.NEXT_PUBLIC_SETUP_COMPLETE === 'true';
+  const allowedDuringSetup = SETUP_ALLOWED_PATHS.some((regex) => regex.test(pathname));
+
+  if (!onboardingComplete && !allowedDuringSetup && !pathname.startsWith('/api')) {
+    return NextResponse.redirect(new URL('/setup', request.url));
+  }
 
   if (!requiresAuth(pathname)) {
     return NextResponse.next();
@@ -54,5 +69,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/api/:path*', '/dashboard/:path*'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)'],
 };

@@ -39,6 +39,8 @@ interface SetupStatus {
     summary: string | null;
     lastRun?: SetupRun;
   };
+  onboardingComplete: boolean;
+  onboardingCompletedAt: string | null;
 }
 
 const defaultStatus: SetupStatus = {
@@ -50,6 +52,8 @@ const defaultStatus: SetupStatus = {
   objectStorageConfigured: false,
   migrations: { applied: false, lastFinishedAt: null },
   seed: { seeded: false, summary: null },
+  onboardingComplete: false,
+  onboardingCompletedAt: null,
 };
 
 type Feedback = { type: 'success' | 'error'; message: string } | null;

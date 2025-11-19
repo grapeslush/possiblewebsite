@@ -18,7 +18,22 @@ if [ -f "$CONFIG_PATH" ]; then
 fi
 
 if [ "${SKIP_MIGRATIONS:-false}" != "true" ]; then
-  pnpm prisma migrate deploy
+  pnpm --filter api setup:init
 fi
+
+set +e
+STATUS_OUTPUT=$(pnpm --filter api setup:status 2>&1)
+STATUS_EXIT=$?
+set -e
+
+echo "$STATUS_OUTPUT"
+
+if [ "$STATUS_EXIT" -eq 0 ]; then
+  export PLATFORM_SETUP_COMPLETE=true
+else
+  export PLATFORM_SETUP_COMPLETE=false
+fi
+
+export NEXT_PUBLIC_SETUP_COMPLETE="$PLATFORM_SETUP_COMPLETE"
 
 exec node server.js
