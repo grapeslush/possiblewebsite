@@ -52,12 +52,16 @@ export function MessageCenter({
   const [orderThreads, setOrderThreads] = useState(initialOrders);
   const [disputeThreads, setDisputeThreads] = useState(initialDisputes);
   const [selection, setSelection] = useState<ThreadSelection>(() => {
-    if (initialOrders.length > 0) {
-      return { kind: 'order', id: initialOrders[0].orderId };
+    const firstOrder = initialOrders[0];
+    if (firstOrder) {
+      return { kind: 'order', id: firstOrder.orderId };
     }
-    if (initialDisputes.length > 0) {
-      return { kind: 'dispute', id: initialDisputes[0].disputeId };
+
+    const firstDispute = initialDisputes[0];
+    if (firstDispute) {
+      return { kind: 'dispute', id: firstDispute.disputeId };
     }
+
     throw new Error('No conversations available');
   });
   const [draft, setDraft] = useState('');

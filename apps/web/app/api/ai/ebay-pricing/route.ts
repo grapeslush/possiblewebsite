@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+
+export const dynamic = 'force-dynamic';
 import { z } from 'zod';
 
 import { incrementMetric, logger, withTiming } from '@/lib/observability';
 
 const querySchema = z.object({
   title: z.string().min(3),
-  category: z.string().optional()
+  category: z.string().optional(),
 });
 
 async function callEbayPricing({ title, category }: z.infer<typeof querySchema>) {
@@ -19,7 +21,7 @@ async function callEbayPricing({ title, category }: z.infer<typeof querySchema>)
     'SERVICE-VERSION': '1.13.0',
     'SECURITY-APPNAME': appId,
     'RESPONSE-DATA-FORMAT': 'JSON',
-    keywords: title
+    keywords: title,
   });
 
   if (category) {
@@ -30,8 +32,8 @@ async function callEbayPricing({ title, category }: z.infer<typeof querySchema>)
   const response = await fetch(endpoint, {
     headers: {
       'X-EBAY-SOA-GLOBAL-ID': process.env.EBAY_GLOBAL_ID ?? 'EBAY-US',
-      'X-EBAY-SOA-OPERATION-NAME': 'findCompletedItems'
-    }
+      'X-EBAY-SOA-OPERATION-NAME': 'findCompletedItems',
+    },
   });
 
   if (!response.ok) {
@@ -52,7 +54,7 @@ function buildPricingSummary(input: z.infer<typeof querySchema>, ebayPayload: an
       currency: 'USD',
       comparableListings: [],
       provider: 'fallback',
-      rationale: `Estimate generated locally for "${input.title}"${input.category ? ` in ${input.category}` : ''}.`
+      rationale: `Estimate generated locally for "${input.title}"${input.category ? ` in ${input.category}` : ''}.`,
     };
   }
 
@@ -63,7 +65,7 @@ function buildPricingSummary(input: z.infer<typeof querySchema>, ebayPayload: an
       title: item.title?.[0],
       price: Number(item.sellingStatus?.[0]?.currentPrice?.[0]?.__value__ ?? 0),
       currency: item.sellingStatus?.[0]?.currentPrice?.[0]?.['@currencyId'] ?? 'USD',
-      url: item.viewItemURL?.[0]
+      url: item.viewItemURL?.[0],
     }))
     .filter((item: any) => item.price > 0);
 
@@ -72,7 +74,8 @@ function buildPricingSummary(input: z.infer<typeof querySchema>, ebayPayload: an
   }
 
   const prices = soldItems.map((item: any) => item.price);
-  const averagePrice = prices.reduce((sum, value) => sum + value, 0) / prices.length;
+  const totalPrice = prices.reduce((sum: number, value: number) => sum + value, 0);
+  const averagePrice = totalPrice / prices.length;
 
   return {
     averagePrice: Number(averagePrice.toFixed(2)),
@@ -81,7 +84,7 @@ function buildPricingSummary(input: z.infer<typeof querySchema>, ebayPayload: an
     currency: soldItems[0]?.currency ?? 'USD',
     comparableListings: soldItems.slice(0, 5),
     provider: 'ebay',
-    rationale: `Based on ${soldItems.length} completed listings from eBay.`
+    rationale: `Based on ${soldItems.length} completed listings from eBay.`,
   };
 }
 

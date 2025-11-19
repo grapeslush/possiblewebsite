@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
+import type { Route } from 'next';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 
-export default function LoginPage() {
+function LoginForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +21,7 @@ export default function LoginPage() {
       email: form.get('email'),
       password: form.get('password'),
       totp: form.get('totp'),
-      redirect: false
+      redirect: false,
     });
 
     setLoading(false);
@@ -30,7 +31,10 @@ export default function LoginPage() {
       return;
     }
 
-    router.push((searchParams?.get('callbackUrl') as string) ?? '/dashboard');
+    const callbackUrl = searchParams?.get('callbackUrl');
+    const destination = callbackUrl && callbackUrl.startsWith('/') ? callbackUrl : '/dashboard';
+
+    router.push(destination as Route);
   };
 
   const registered = searchParams?.has('registered');
@@ -46,15 +50,30 @@ export default function LoginPage() {
       <form className="space-y-4" onSubmit={onSubmit}>
         <div>
           <label className="block text-sm font-medium">Email</label>
-          <input className="mt-1 w-full rounded border px-3 py-2" name="email" type="email" required />
+          <input
+            className="mt-1 w-full rounded border px-3 py-2"
+            name="email"
+            type="email"
+            required
+          />
         </div>
         <div>
           <label className="block text-sm font-medium">Password</label>
-          <input className="mt-1 w-full rounded border px-3 py-2" name="password" type="password" required />
+          <input
+            className="mt-1 w-full rounded border px-3 py-2"
+            name="password"
+            type="password"
+            required
+          />
         </div>
         <div>
           <label className="block text-sm font-medium">Authenticator code</label>
-          <input className="mt-1 w-full rounded border px-3 py-2" name="totp" type="text" placeholder="123456" />
+          <input
+            className="mt-1 w-full rounded border px-3 py-2"
+            name="totp"
+            type="text"
+            placeholder="123456"
+          />
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button
@@ -66,5 +85,15 @@ export default function LoginPage() {
         </button>
       </form>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={<div className="py-12 text-center text-sm text-muted-foreground">Loading…</div>}
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

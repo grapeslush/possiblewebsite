@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@possiblewebsite/db';
 import { getServerAuthSession } from '@/lib/auth';
 import { stripe } from '@/lib/stripe';
-import { verifyCsrfToken, getCsrfHeaderName } from '@/lib/auth/csrf';
+import { getCsrfHeaderName } from '@/lib/auth/csrf';
+import { verifyCsrfToken } from '@/lib/auth/csrf.server';
 
 export async function POST(request: Request) {
   if (!stripe) {
@@ -31,14 +32,14 @@ export async function POST(request: Request) {
   if (!connectAccountId) {
     const account = await stripe.accounts.create({
       type: 'express',
-      email: user.email
+      email: user.email,
     });
 
     connectAccountId = account.id;
 
     await prisma.user.update({
       where: { id: user.id },
-      data: { stripeConnectId: connectAccountId }
+      data: { stripeConnectId: connectAccountId },
     });
   }
 
@@ -48,7 +49,7 @@ export async function POST(request: Request) {
     account: connectAccountId,
     refresh_url: `${appUrl}/dashboard/billing`,
     return_url: `${appUrl}/dashboard/billing/completed`,
-    type: 'account_onboarding'
+    type: 'account_onboarding',
   });
 
   return NextResponse.json({ url: link.url });

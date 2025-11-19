@@ -2,7 +2,20 @@ import { prisma } from '@possiblewebsite/db';
 import { notFound } from 'next/navigation';
 import { MessageCenter } from './thread-client';
 
+export const dynamic = 'force-dynamic';
+
 export default async function MessageThreadsPage() {
+  if (!process.env.DATABASE_URL) {
+    return (
+      <div className="mx-auto max-w-4xl px-6 py-16 text-center">
+        <h1 className="text-3xl font-semibold text-brand-secondary">Message center unavailable</h1>
+        <p className="mt-3 text-sm text-muted-foreground">
+          Configure DATABASE_URL to load order and dispute conversations.
+        </p>
+      </div>
+    );
+  }
+
   const [orders, disputes] = await Promise.all([
     prisma.order.findMany({
       take: 5,
