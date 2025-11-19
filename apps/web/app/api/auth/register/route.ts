@@ -3,8 +3,8 @@ import { prisma, AuthService } from '@possiblewebsite/db';
 import { hash } from 'bcryptjs';
 import { getRequiredPolicies } from '@/lib/auth/policies';
 import { sendVerificationEmail } from '@/lib/email';
-import { getCsrfHeaderName } from '@/lib/auth/csrf';
 import { createCsrfToken, verifyCsrfToken } from '@/lib/auth/csrf.server';
+import { getCsrfHeaderName } from '@/lib/auth/csrf';
 import { stripe } from '@/lib/stripe';
 
 const authService = new AuthService(prisma);
@@ -62,7 +62,11 @@ const validateBody = (body: any) => {
 };
 
 export async function GET() {
-  return NextResponse.json({ csrfToken: createCsrfToken(), policies: getRequiredPolicies() });
+  return NextResponse.json({
+    csrfToken: createCsrfToken(),
+    headerName: getCsrfHeaderName(),
+    policies: getRequiredPolicies(),
+  });
 }
 
 export async function POST(request: Request) {

@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getCsrfHeaderName } from '@/lib/auth/csrf';
 
 export default function ConnectOnboardingButton() {
+  const [csrfHeaderName, setCsrfHeaderName] = useState('');
   const [csrfToken, setCsrfToken] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -13,6 +13,7 @@ export default function ConnectOnboardingButton() {
       const response = await fetch('/api/auth/csrf');
       if (!response.ok) return;
       const data = await response.json();
+      setCsrfHeaderName(data.headerName);
       setCsrfToken(data.csrfToken);
     };
     load();
@@ -24,7 +25,7 @@ export default function ConnectOnboardingButton() {
 
     const response = await fetch('/api/stripe/connect/onboarding', {
       method: 'POST',
-      headers: { [getCsrfHeaderName()]: csrfToken }
+      headers: csrfHeaderName && csrfToken ? { [csrfHeaderName]: csrfToken } : undefined,
     });
 
     setLoading(false);

@@ -1,9 +1,5 @@
-import 'server-only';
-
-import { randomBytes, createHash, timingSafeEqual } from 'crypto';
 import { cookies } from 'next/headers';
-
-import { getCsrfHeaderName } from './csrf';
+import { randomBytes, createHash, timingSafeEqual } from 'crypto';
 
 const CSRF_COOKIE_NAME = '__Host-csrf-token';
 
@@ -50,6 +46,3 @@ export const verifyCsrfToken = (token: string | null | undefined) => {
     return false;
   }
 };
-
-export const getCsrfCookieName = () => CSRF_COOKIE_NAME;
-export const getCsrfHeaderNameServer = () => getCsrfHeaderName();
