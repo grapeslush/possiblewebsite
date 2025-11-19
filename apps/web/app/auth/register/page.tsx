@@ -2,17 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getCsrfHeaderName } from '@/lib/auth/csrf';
 
 type Policy = { policy: string; version: string };
 
 interface RegisterResponse {
+  headerName: string;
   csrfToken: string;
   policies: Policy[];
 }
 
 export default function RegisterPage() {
   const router = useRouter();
+  const [csrfHeaderName, setCsrfHeaderName] = useState('');
   const [csrfToken, setCsrfToken] = useState('');
   const [policies, setPolicies] = useState<Policy[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -23,6 +24,7 @@ export default function RegisterPage() {
       const response = await fetch('/api/auth/register');
       if (!response.ok) return;
       const data = (await response.json()) as RegisterResponse;
+      setCsrfHeaderName(data.headerName);
       setCsrfToken(data.csrfToken);
       setPolicies(data.policies);
     };
@@ -53,7 +55,7 @@ export default function RegisterPage() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        [getCsrfHeaderName()]: csrfToken,
+        ...(csrfHeaderName && csrfToken ? { [csrfHeaderName]: csrfToken } : {}),
       },
       body: JSON.stringify(payload),
     });
