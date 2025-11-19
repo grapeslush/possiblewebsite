@@ -1,4 +1,4 @@
-import { JsonValue, PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 
 export class PlatformSettingRepository {
   constructor(private readonly prisma: PrismaClient) {}
@@ -7,7 +7,7 @@ export class PlatformSettingRepository {
     return this.prisma.platformSetting.findUnique({ where: { key } });
   }
 
-  set(key: string, value: JsonValue) {
+  set(key: string, value: Prisma.InputJsonValue) {
     return this.prisma.platformSetting.upsert({
       where: { key },
       create: { key, value },
