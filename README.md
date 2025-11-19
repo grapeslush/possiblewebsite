@@ -46,22 +46,15 @@ Tackle Exchange is a reference marketplace built for buying and selling used fis
 
 ### Docker-based workflow
 
-Use the provided compose stack to bring up the app container. Optional profiles can also start PostgreSQL, Redis, MailHog, and MinIO if you don't want to point at external services. All defaults are baked into the compose file, so you do not need to create a `.env` to get started (the setup wizard will write one inside the container after first-run):
+Use the provided compose stack to bring up the app container. Optional profiles can also start PostgreSQL, Redis, MailHog, and MinIO if you don't want to point at external services:
 
 ```bash
-docker-compose up --build                                    # app only
-docker-compose --profile postgres --profile redis up --build  # add DB/cache
-docker-compose --profile minio --profile mailhog up --build   # add storage/mail
+docker compose up --build                       # app only
+docker compose --profile postgres --profile redis up --build  # add DB/cache
+docker compose --profile minio --profile mailhog up --build   # add storage/mail
 ```
 
 If you prefer to pre-seed configuration values instead of using the wizard, copy `.env.example` to `.env` before building:
-
-```bash
-cp .env.example .env
-docker-compose up --build
-```
-
-The web UI is available at <http://localhost:3000>, the API at <http://localhost:4000>, MailHog at <http://localhost:8025>, and the MinIO Console at <http://localhost:9001>.
 
 On first launch the app redirects to `/setup`, where you can enter database/cache, storage, mail, and admin credentials through the browser. Configuration is written to `/app/.env` inside the container; bind-mount a host path to that file if you want it to persist across rebuilds. The `.env.example` is still available for pre-seeding values when automating deployments or overriding the wizard defaults, but manual editing is no longer required for local trials.
 
