@@ -12,6 +12,7 @@ const execAsync = util.promisify(execCallback);
 
 const CONFIG_PATH = process.env.CONFIG_FILE_PATH ?? '/var/lib/possible/config.env';
 const STATE_PATH = path.join(path.dirname(CONFIG_PATH), 'setup-state.json');
+const ONBOARDING_STATE_KEY = 'platform.onboarding';
 
 const REQUIRED_KEYS = [
   'DATABASE_URL',
@@ -32,6 +33,13 @@ interface SetupState {
   migrations?: SetupStateEntry;
   seed?: SetupStateEntry;
 }
+
+type OnboardingState = {
+  completed: boolean;
+  completedAt?: string;
+  migrationsRanAt?: string;
+  seedRanAt?: string;
+};
 
 const parseEnvFile = (content: string): Record<string, string> => {
   const lines = content.split(/\r?\n/);
@@ -120,6 +128,41 @@ async function readSetupState(): Promise<SetupState> {
   }
 }
 
+const parseOnboardingState = (value: Prisma.JsonValue | null | undefined): OnboardingState => {
+  const payload = value as Prisma.JsonObject | undefined;
+  const completedAt = typeof payload?.completedAt === 'string' ? payload.completedAt : undefined;
+  const migrationsRanAt =
+    typeof payload?.migrationsRanAt === 'string' ? payload.migrationsRanAt : undefined;
+  const seedRanAt = typeof payload?.seedRanAt === 'string' ? payload.seedRanAt : undefined;
+
+  return {
+    completed: payload?.completed === true,
+    completedAt,
+    migrationsRanAt,
+    seedRanAt,
+  };
+};
+
+async function readOnboardingState(): Promise<OnboardingState> {
+  try {
+    const record = await prisma.platformSetting.findUnique({
+      where: { key: ONBOARDING_STATE_KEY },
+    });
+    return parseOnboardingState(record?.value);
+  } catch (error) {
+    logger.warn({ err: error }, 'unable to read onboarding state');
+    return { completed: false };
+  }
+}
+
+async function writeOnboardingState(state: OnboardingState) {
+  await prisma.platformSetting.upsert({
+    where: { key: ONBOARDING_STATE_KEY },
+    update: { value: state },
+    create: { key: ONBOARDING_STATE_KEY, value: state },
+  });
+}
+
 async function writeSetupState(update: Partial<SetupState>) {
   const current = await readSetupState();
   const merged = { ...current, ...update } satisfies SetupState;
@@ -181,6 +224,7 @@ export async function getSetupStatus() {
   }
 
   const state = await readSetupState();
+  const onboarding = await readOnboardingState();
 
   return {
     ready: missingKeys.length === 0 && databaseConnected,
@@ -203,6 +247,8 @@ export async function getSetupStatus() {
       summary: seedSummary,
       lastRun: state.seed,
     },
+    onboardingComplete: onboarding.completed,
+    onboardingCompletedAt: onboarding.completedAt ?? null,
   };
 }
 
@@ -249,6 +295,61 @@ export async function runSeed() {
     await writeSetupState({ seed: { ranAt, status: 'failed', message: stderr.slice(-2000) } });
     logger.error({ err: error }, 'seed run failed');
     return { ok: false, error: stderr, ranAt } as const;
+  }
+}
+
+export async function getOnboardingStatus() {
+  return readOnboardingState();
+}
+
+export async function initializePlatform() {
+  const onboarding = await readOnboardingState();
+
+  if (onboarding.completed) {
+    return {
+      ok: true,
+      alreadyCompleted: true,
+      completedAt: onboarding.completedAt ?? null,
+      migrationsRanAt: onboarding.migrationsRanAt ?? null,
+      seedRanAt: onboarding.seedRanAt ?? null,
+    } as const;
+  }
+
+  try {
+    const migrationResult = await runMigrations();
+    if (!migrationResult.ok) {
+      return { ok: false, error: migrationResult.error, ranAt: migrationResult.ranAt } as const;
+    }
+
+    let seedRanAt = onboarding.seedRanAt ?? null;
+
+    if (!seedRanAt) {
+      const seedResult = await runSeed();
+      if (!seedResult.ok) {
+        return { ok: false, error: seedResult.error, ranAt: seedResult.ranAt } as const;
+      }
+
+      seedRanAt = seedResult.ranAt;
+    }
+
+    const completedAt = new Date().toISOString();
+    await writeOnboardingState({
+      completed: true,
+      completedAt,
+      migrationsRanAt: migrationResult.ranAt,
+      seedRanAt,
+    });
+
+    return {
+      ok: true,
+      alreadyCompleted: false,
+      completedAt,
+      migrationsRanAt: migrationResult.ranAt,
+      seedRanAt,
+    } as const;
+  } catch (error) {
+    logger.error({ err: error }, 'platform initialization failed');
+    return { ok: false, error: (error as Error).message } as const;
   }
 }
 

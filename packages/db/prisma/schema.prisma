@@ -857,3 +857,10 @@ model AuditLog {
   createdAt DateTime @default(now())
   actor     User?    @relation("UserAuditLogs", fields: [actorId], references: [id])
 }
+
+model PlatformSetting {
+  key       String   @id
+  value     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
