@@ -54,7 +54,7 @@ docker compose --profile postgres --profile redis up --build  # add DB/cache
 docker compose --profile minio --profile mailhog up --build   # add storage/mail
 ```
 
-The web UI is available at <http://localhost:3000>, the API at <http://localhost:4000>, MailHog at <http://localhost:8025>, and the MinIO Console at <http://localhost:9001>.
+If you prefer to pre-seed configuration values instead of using the wizard, copy `.env.example` to `.env` before building:
 
 On first launch the app redirects to `/setup`, where you can enter database/cache, storage, mail, and admin credentials through the browser. Configuration is written to `/app/.env` inside the container; bind-mount a host path to that file if you want it to persist across rebuilds. The `.env.example` is still available for pre-seeding values when automating deployments or overriding the wizard defaults, but manual editing is no longer required for local trials.
 
