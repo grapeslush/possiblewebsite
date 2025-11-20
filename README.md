@@ -48,6 +48,8 @@ Tackle Exchange is a reference marketplace built for buying and selling used fis
 
 Use the provided compose stack to bring up the app container. Optional profiles can also start PostgreSQL, Redis, MailHog, and MinIO if you don't want to point at external services:
 
+> **Note:** The stack requires Docker Compose v2 (`docker compose`). The legacy `docker-compose` v1 binary is unsupported. If you hit a `ContainerConfig` error, remove any existing containers and volumes before retrying with the v2 CLI: `docker compose down -v --remove-orphans`.
+
 ```bash
 docker compose up --build                       # app only
 docker compose --profile postgres --profile redis up --build  # add DB/cache
