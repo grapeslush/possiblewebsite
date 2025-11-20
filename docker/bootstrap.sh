@@ -17,6 +17,10 @@ if [ -f "$CONFIG_PATH" ]; then
   set +o allexport
 fi
 
+if [ "${SKIP_PRISMA_GENERATE:-false}" != "true" ]; then
+  pnpm --filter db prisma:generate
+fi
+
 if [ "${SKIP_MIGRATIONS:-false}" != "true" ]; then
   pnpm --filter api setup:init
 fi
